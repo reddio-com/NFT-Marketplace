@@ -1,0 +1,137 @@
+.connectDialogWrapper {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #FFFFFF;
+  border-radius: 10px;
+
+  img {
+    width: 72px;
+    position: absolute;
+    left: 50%;
+    top: -36px;
+    transform: translate(-50%, 0);
+  }
+
+  & > div {
+    position: relative;
+    width: 360px;
+    box-sizing: border-box;
+    padding: 60px 36px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    & > div {
+      margin: 18px 0 42px;
+
+      & > div {
+        margin-bottom: 6px;
+
+        & span:first-child, & svg {
+          margin-right: 6px;
+          display: inline-block;
+          width: 23px;
+        }
+
+        svg {
+          position: relative;
+          left: -5px;
+        }
+      }
+    }
+  }
+}
+
+.operateDialogContent {
+  & > div:first-child {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  & > span {
+    display: inline-block;
+    margin-top: 26px;
+  }
+
+  .buttonWrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 48px;
+    gap: 16px;
+
+    & > button {
+      flex: 1;
+    }
+  }
+
+  .infoWrapper {
+    display: flex;
+    gap: 10px;
+    align-items: start;
+    margin-top: 27px;
+
+    & > svg {
+      color: #0072f5;
+      position: relative;
+      top: 4px;
+    }
+  }
+}
+
+.recordDialogContent {
+  height: 494px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+
+  & > div:first-child {
+    text-align: center;
+
+    & > span {
+      margin-right: 16px;
+    }
+  }
+  & > div:last-child {
+    flex: 1;
+    overflow-y: scroll;
+  }
+
+  .recordItem {
+    padding: 18px 24px;
+    border-bottom: 1px solid #F5F5F5;
+
+    & > div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+  }
+}
+
+.withdrawalDialogContent {
+  height: 494px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+
+  & > div:first-child {
+    text-align: center;
+
+    & > span {
+      margin-right: 16px;
+    }
+  }
+  & > div:last-child {
+    flex: 1;
+
+    & > div {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+    }
+  }
+}

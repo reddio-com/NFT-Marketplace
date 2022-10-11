@@ -1,0 +1,41 @@
+.orderListWrapper {
+  background: #FFFFFF;
+  border-radius: 10px;
+  flex: 1;
+  margin-top: 24px;
+  padding: 22px 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  & > div {
+    margin-top: 20px;
+    overflow-y: scroll;
+    flex: 1;
+
+    .item {
+      display: flex;
+      flex-direction: column;
+      box-sizing: content-box;
+      text-align: center;
+      cursor: pointer;
+
+      &:hover button {
+        display: flex;
+      }
+
+      & > div {
+        position: relative;
+
+        & button {
+          z-index: 10;
+          display: none;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+        }
+      }
+    }
+  }
+}

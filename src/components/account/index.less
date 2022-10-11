@@ -1,0 +1,75 @@
+.accountHeaderWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  & > div {
+    display: flex;
+    align-items: center;
+  }
+
+  .leftWrapper {
+    & > img {
+      margin-right: 11px;
+    }
+    & > span {
+      padding: 0 4px 0;
+    }
+    & > button {
+      position: relative;
+      top: -2px;
+    }
+  }
+}
+
+.accountListWrapper {
+  background: #FFFFFF;
+  border-radius: 10px;
+  flex: 1;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+
+  .accountListContent {
+    display: flex;
+    height: 100%;
+
+    & > div {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      & > span {
+        display: block;
+        margin: 29px 33px 19px;
+      }
+
+      .listWrapper {
+        flex: 1;
+        .listItem {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 24px;
+          height: 72px;
+          cursor: pointer;
+
+          &:hover {
+            background: #F3F3F3;
+          }
+        }
+      }
+
+      .buttonWrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 60px;
+      }
+    }
+
+    & > div:last-child {
+      border-left: 1px solid #E7E7E7;
+    }
+  }
+}

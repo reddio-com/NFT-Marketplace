@@ -1,0 +1,28 @@
+.layout {
+  & > header {
+    height: 52px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    padding-left: 24px;
+  }
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 0;
+    background: #f3f3f3;
+    height: calc(100vh - 52px);
+    box-sizing: border-box;
+    position: relative;
+
+    .contentWrapper {
+      width: 1080px;
+      min-width: 1080px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}

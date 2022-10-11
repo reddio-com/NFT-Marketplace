@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "author": "KieSun <zx597813039@gmail.com>",
+  "scripts": {
+    "dev": "umi dev",
+    "build": "umi build",
+    "postinstall": "umi setup",
+    "setup": "umi setup",
+    "start": "npm run dev"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^4.3.9",
+    "@reddio.com/js": "^0.3.3",
+    "axios": "^0.27.2",
+    "ethers": "^5.7.1",
+    "normalize.css": "^8.0.1",
+    "tdesign-react": "^0.41.1",
+    "umi": "^4.0.20",
+    "valtio": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "prettier": "^2",
+    "prettier-plugin-organize-imports": "^2",
+    "prettier-plugin-packagejson": "^2",
+    "typescript": "^4.1.2"
+  }
+}
