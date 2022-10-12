@@ -1,10 +1,10 @@
-import { Button, Row, Col, message, Image } from 'tdesign-react';
+import { Button, Row, Col, message, Image, Space } from 'tdesign-react';
 import { ShopIcon } from 'tdesign-icons-react';
 import Text from '../typography';
 import styles from './index.less';
 import { useQuery } from '@tanstack/react-query';
 import { reddio } from '@/utils/config';
-import { ERC20Address, ERC721Address } from '@/utils/common';
+import { ERC721Address } from '@/utils/common';
 import { useCallback, useState } from 'react';
 import type { OrderListResponse } from '@reddio.com/js';
 import axios from 'axios';
@@ -69,7 +69,7 @@ const OrderList = () => {
         orderType: 'buy',
         tokenType: order.token_type,
         price: order.display_price,
-        marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7'
+        marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7',
       });
       const { data } = await reddio.apis.order(params);
       orderListQuery.refetch();
@@ -109,6 +109,8 @@ const OrderList = () => {
                 </Button>
               </div>
               <Text>{item.display_price} ETH</Text>
+              <Space />
+              <Text>Token Id: {item.token_id}</Text>
             </Col>
           );
         })}
