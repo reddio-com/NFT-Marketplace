@@ -1,8 +1,6 @@
 import { ethers } from 'ethers';
 import { Reddio } from '@reddio.com/js';
 
-console.log(Reddio);
-
 let reddio: Reddio;
 const initReddio = () => {
   if (typeof window !== 'undefined' && !reddio) {

@@ -1,13 +1,20 @@
-import { Dialog, Form, Input, Select, Button, message } from 'tdesign-react';
+import {
+  Dialog,
+  Form,
+  Input,
+  Select,
+  Button,
+  NotificationPlugin,
+} from 'tdesign-react';
 import { InfoCircleFilledIcon } from 'tdesign-icons-react';
 import Text from '../typography';
 import styles from './index.less';
-import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
 import { useCallback, useMemo, useState } from 'react';
 import { reddio } from '@/utils/config';
 import { ERC20Address, ERC721Address } from '@/utils/common';
 import type { SignTransferParams } from '@reddio.com/js';
+import { BigNumber, ethers } from 'ethers';
 
 const FormItem = Form.FormItem;
 
@@ -21,7 +28,6 @@ interface IOperateProps {
 
 const Operate = (props: IOperateProps) => {
   const { type, onClose, l1Balance, l2Balance, ethAddress } = props;
-  const snap = useSnapshot(store);
   const [form] = Form.useForm();
 
   const [selectType, setSelectType] = useState('GoerliETH');
@@ -107,25 +113,39 @@ const Operate = (props: IOperateProps) => {
     }));
   }, [type, l1Balance, l2Balance]);
 
+  const showNotification = useCallback((content: string) => {
+    const notification = NotificationPlugin.success({
+      title: 'Message',
+      content,
+      closeBtn: true,
+      duration: 10000,
+      onCloseBtnClick: () => {
+        NotificationPlugin.close(notification);
+      },
+    });
+  }, []);
+
   const approve = useCallback(async () => {
     try {
       setLoading(true);
       const tokenAddress =
         selectType === 'ERC20' ? ERC20Address : ERC721Address;
+      let tx;
       if (selectType === 'ERC20') {
-        await reddio.erc20.approve({
+        tx = await reddio.erc20.approve({
           tokenAddress,
           amount: form.getFieldValue?.('amount'),
         });
       } else {
-        await reddio.erc721.approve({
+        tx = await reddio.erc721.approve({
           tokenAddress,
           tokenId: form.getFieldValue?.('tokenId'),
         });
       }
-      await message.success(
+      showNotification(
         'Approve success，wait a moment before making a deposit',
       );
+      await tx.wait();
       setNeedApprove(false);
       setLoading(false);
     } catch (e) {
@@ -158,9 +178,7 @@ const Operate = (props: IOperateProps) => {
             tokenAddress: ERC721Address,
           });
         }
-        await message.success(
-          'Deposit is successful, please wait for the arrival',
-        );
+        showNotification('Deposit is successful, please wait for the arrival');
         setLoading(false);
         onClose();
       } catch (e) {
@@ -195,9 +213,7 @@ const Operate = (props: IOperateProps) => {
           params.tokenId = tokenId;
         }
         await reddio.apis.transfer(params);
-        await message.success(
-          'Transfer is successful, please wait for the arrival',
-        );
+        showNotification('Transfer is successful, please wait for the arrival');
         setLoading(false);
         onClose();
       } catch (e) {
@@ -232,7 +248,7 @@ const Operate = (props: IOperateProps) => {
           params.tokenId = tokenId;
         }
         await reddio.apis.withdrawalFromL2(params);
-        await message.success(
+        showNotification(
           'WithdrawalFromL2 is successful, please wait for the arrival',
         );
         setLoading(false);

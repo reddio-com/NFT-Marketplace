@@ -1,4 +1,11 @@
-import { Button, Divider, message, Space } from 'tdesign-react';
+import {
+  Button,
+  Divider,
+  message,
+  NotificationPlugin,
+  Tooltip,
+  Space,
+} from 'tdesign-react';
 import {
   ChevronRightIcon,
   GiftIcon,
@@ -35,7 +42,7 @@ const AccountList = () => {
   const [l2Balance, setL2Balance] = useState<Record<string, any>>({
     GoerliETH: '',
     ERC20: '',
-    ERC721: '',
+    ERC721: 0,
   });
   const [address, setAddress] = useState('');
   const [dialogInfo, setDialogInfo] = useState({
@@ -69,7 +76,7 @@ const AccountList = () => {
     },
     {
       onSuccess: ({ data }) => {
-        if (data.data.length) {
+        if (data.data.length && snap.starkKey) {
           const ethBalance = data.data.find((item) => item.type === 'ETH');
           const erc20Balance = data.data.find(
             (item) => item.contract_address === ERC20Address.toLowerCase(),
@@ -79,11 +86,29 @@ const AccountList = () => {
               item.contract_address === ERC721Address.toLowerCase() &&
               item.balance_available,
           );
-          setL2Balance({
-            GoerliETH: ethBalance?.display_value || '',
-            ERC20: erc20Balance?.display_value || '',
-            ERC721: erc721Balance.length,
-            tokenIds: erc721Balance,
+          setL2Balance((value) => {
+            if (
+              (!!value.GoerliETH &&
+                ethBalance?.display_value !== value.GoerliETH) ||
+              (!!value.ERC20 && erc20Balance?.display_value !== value.ERC20) ||
+              (!!value.ERC721 && erc721Balance?.length !== value.ERC721)
+            ) {
+              const notification = NotificationPlugin.success({
+                title: 'Message',
+                content: 'Your Balance has been updated',
+                closeBtn: true,
+                duration: 3000,
+                onCloseBtnClick: () => {
+                  NotificationPlugin.close(notification);
+                },
+              });
+            }
+            return {
+              GoerliETH: ethBalance?.display_value,
+              ERC20: erc20Balance?.display_value,
+              ERC721: erc721Balance.length,
+              tokenIds: erc721Balance,
+            };
           });
           setLoading((v) => ({
             ...v,
@@ -99,7 +124,7 @@ const AccountList = () => {
     const timer = setInterval(() => {
       getL1Balances();
       getBalancesQuery.refetch();
-    }, 1000 * 60);
+    }, 1000 * 10);
     return () => {
       timer && window.clearInterval(timer);
     };
@@ -238,30 +263,60 @@ const AccountList = () => {
             })}
           </div>
           <Space className={styles.buttonWrapper}>
-            <Button
-              shape="round"
-              icon={<LoginIcon />}
-              disabled={loading.l1}
-              onClick={() => handleOperate('Deposit')}
+            <Tooltip
+              content={
+                loading.l1 ? 'Please wait for the L1 balance to be updated' : ''
+              }
+              destroyOnClose
+              placement="top"
+              showArrow
+              theme="default"
             >
-              Deposit
-            </Button>
-            <Button
-              shape="round"
-              icon={<SwapIcon />}
-              disabled={loading.l2}
-              onClick={() => handleOperate('Transfer')}
+              <Button
+                shape="round"
+                icon={<LoginIcon />}
+                disabled={loading.l1}
+                onClick={() => handleOperate('Deposit')}
+              >
+                Deposit
+              </Button>
+            </Tooltip>
+            <Tooltip
+              content={
+                loading.l2 ? 'Please wait for the l2 balance to be updated' : ''
+              }
+              destroyOnClose
+              placement="top"
+              showArrow
+              theme="default"
             >
-              Transfer
-            </Button>
-            <Button
-              shape="round"
-              disabled={loading.l2}
-              icon={<LogoutIcon />}
-              onClick={() => handleOperate('Withdrawal')}
+              <Button
+                shape="round"
+                icon={<SwapIcon />}
+                disabled={loading.l2}
+                onClick={() => handleOperate('Transfer')}
+              >
+                Transfer
+              </Button>
+            </Tooltip>
+            <Tooltip
+              content={
+                loading.l2 ? 'Please wait for the l2 balance to be updated' : ''
+              }
+              destroyOnClose
+              placement="top"
+              showArrow
+              theme="default"
             >
-              Withdrawal
-            </Button>
+              <Button
+                shape="round"
+                disabled={loading.l2}
+                icon={<LogoutIcon />}
+                onClick={() => handleOperate('Withdrawal')}
+              >
+                Withdrawal
+              </Button>
+            </Tooltip>
           </Space>
         </div>
       </div>
