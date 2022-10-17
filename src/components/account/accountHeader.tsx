@@ -10,7 +10,7 @@ import { useSnapshot } from 'valtio';
 import { addStarkKey, store } from '@/utils/store';
 import Record from '@/components/dialog/record';
 import Withdrawal from '@/components/dialog/withdrawal';
-import { initReddio, reddio } from '@/utils/config';
+import { initReddio, isVercel, reddio } from '@/utils/config';
 
 const AccountHeader = () => {
   const snap = useSnapshot(store);
@@ -25,7 +25,7 @@ const AccountHeader = () => {
   const connect = useCallback(async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send('wallet_switchEthereumChain', [
-      { chainId: ethers.utils.hexValue(5) },
+      { chainId: ethers.utils.hexValue(isVercel ? 1 : 5) },
     ]);
     await provider.send('eth_requestAccounts', []);
     await getAddress();

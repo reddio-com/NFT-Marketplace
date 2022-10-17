@@ -3,10 +3,10 @@ import Text from '../typography';
 import styles from './index.less';
 import { useCallback, useState } from 'react';
 import { ethers } from 'ethers';
-import { initReddio, reddio } from '@/utils/config';
+import { initReddio, reddio, isVercel } from '@/utils/config';
 import { Loading } from 'tdesign-react';
 import { CheckCircleFilledIcon } from 'tdesign-icons-react';
-import { initProviderAndSigner } from "@/utils/util";
+import { initProviderAndSigner } from '@/utils/util';
 import { addStarkKey } from '@/utils/store';
 
 const steps = [
@@ -25,10 +25,10 @@ const ConnectDialog = ({ onSuccess }: ConnectDialogProps) => {
 
   const changeNetwork = useCallback(async () => {
     setLoading(true);
-    const { provider } = await initProviderAndSigner()
+    const { provider } = await initProviderAndSigner();
     await provider.send('wallet_switchEthereumChain', [
-      { chainId: ethers.utils.hexValue(5) }
-    ])
+      { chainId: ethers.utils.hexValue(isVercel ? 1 : 5) },
+    ]);
     setStepIndex(1);
     await provider.send('eth_requestAccounts', []);
     setStepIndex(2);
