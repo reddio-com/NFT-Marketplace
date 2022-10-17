@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
 import { Reddio } from '@reddio.com/js';
 
+console.log(process.env.IS_VERCEL);
+
 let reddio: Reddio;
 const initReddio = () => {
   if (typeof window !== 'undefined' && !reddio) {
