@@ -1099,10 +1099,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.6.tgz#cee20bd55e68a1720bdab363ecf0c821ded4cd45"
   integrity sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==
 
-"@reddio.com/js@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@reddio.com/js/-/js-0.3.3.tgz#d165f41e7d4f086adb1d3920f17cc588c101c63d"
-  integrity sha512-xWF6ySDo4umaq7eae6Wf+OWhTFJZ9QQIwBYZeRkQGoJjdjVF/NNGJBgfb9sEkSVaeU8wAvZR76lTY6IHSUqc/g==
+"@reddio.com/js@^0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@reddio.com/js/-/js-0.3.4.tgz#7d0999785a547c4a70647199da9177a9ed0781ed"
+  integrity sha512-kdrCDp+XTgRxFrk5WVDUUsykMjyH47eNF4r0Hfa7RzYYxOxFY+3bemVAIG9jEHpRq7veUz+sL/p43ALXOXm9Dg==
   dependencies:
     "@starkware-industries/starkware-crypto-utils" "^0.0.2"
     assert "^2.0.0"
