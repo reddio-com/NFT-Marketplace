@@ -1,6 +1,6 @@
 ## Introduction
 
-- This project is a demo project which aims to demonstrate the functionalities of Reddio ([https://www.reddio.com/](https://www.reddio.com/)).
+- This project is a demo project which aims to demonstrate the functionalities of [Reddio](https://www.reddio.com/).
 - Reddio is an easy-to-use layer2 zkRollup Agnostic APIs.
 - It helps developers integrate their applications with low gas fee and high scalability layer 2 technology within only 5 minutes.
 - This new zkRollup technology  is being widely use by many NFT marketplaces, GameFi , Defi projects etc.
