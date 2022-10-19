@@ -6,16 +6,19 @@ import { useQuery } from '@tanstack/react-query';
 import { reddio } from '@/utils/config';
 import { ERC721Address } from '@/utils/common';
 import { useCallback, useState } from 'react';
-import type { OrderListResponse } from '@reddio.com/js';
+import type { OrderListResponse, BalanceResponse } from '@reddio.com/js';
 import axios from 'axios';
 import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
+import SellDialog from '../dialog/sell';
 
 const OrderList = () => {
   const snap = useSnapshot(store);
   const [orderList, setOrderList] = useState<OrderListResponse[]>([]);
   const [images, setImages] = useState<any[]>([]);
   const [ethBalance, setEthBalance] = useState(0);
+  const [nftBalance, setNftBalance] = useState<BalanceResponse[]>([]);
+  const [showSellDialog, setShowSellDialog] = useState(false);
 
   const orderListQuery = useQuery(
     ['orderList'],
@@ -37,18 +40,24 @@ const OrderList = () => {
     },
   );
 
-  const getBalancesQuery = useQuery(
+  useQuery(
     ['getBalances', snap.starkKey],
     () => {
       return reddio.apis.getBalances({
         starkKey: snap.starkKey,
-        contractAddress: 'eth',
       });
     },
     {
       onSuccess: ({ data }) => {
         if (data.data.length) {
-          setEthBalance(data.data[0].balance_available);
+          const ethBalance = data.data.find((item) => item.type === 'ETH');
+          const erc721Balance = data.data.filter(
+            (item) =>
+              item.contract_address === ERC721Address.toLowerCase() &&
+              item.balance_available,
+          );
+          ethBalance && setEthBalance(ethBalance.balance_available);
+          setNftBalance(erc721Balance);
         }
       },
     },
@@ -71,7 +80,7 @@ const OrderList = () => {
         price: order.display_price,
         marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7',
       });
-      const { data } = await reddio.apis.order(params);
+      await reddio.apis.order(params);
       orderListQuery.refetch();
       message.success('Buy Success');
     },
@@ -79,43 +88,61 @@ const OrderList = () => {
   );
 
   return (
-    <div className={styles.orderListWrapper}>
-      <Text type="bold">Order List</Text>
-      <Row gutter={[20, 24]}>
-        {orderList.map((item, index) => {
-          return (
-            <Col flex="190px" className={styles.item} key={index}>
-              <div>
-                <div style={{ width: 190, height: 190 }}>
-                  {images.length ? (
-                    <Image
-                      src={images[index].image}
-                      alt=""
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        background: 'none',
-                      }}
-                    />
-                  ) : null}
+    <>
+      <div className={styles.orderListWrapper}>
+        <div>
+          <Text type="bold">Order List</Text>
+          <Button
+            theme="primary"
+            variant="text"
+            disabled={!snap.starkKey}
+            onClick={() => setShowSellDialog(true)}
+          >
+            Sell NFT
+          </Button>
+        </div>
+        <Row gutter={[20, 24]}>
+          {orderList.map((item, index) => {
+            return (
+              <Col flex="190px" className={styles.item} key={index}>
+                <div>
+                  <div style={{ width: 190, height: 190 }}>
+                    {images.length ? (
+                      <Image
+                        src={images[index]?.image}
+                        alt=""
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          background: 'none',
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                  <Button
+                    icon={<ShopIcon />}
+                    shape="round"
+                    disabled={!snap.starkKey}
+                    onClick={() => buy(item)}
+                  >
+                    Buy
+                  </Button>
                 </div>
-                <Button
-                  icon={<ShopIcon />}
-                  shape="round"
-                  disabled={!snap.starkKey}
-                  onClick={() => buy(item)}
-                >
-                  Buy
-                </Button>
-              </div>
-              <Text>{item.display_price} ETH</Text>
-              <Space />
-              <Text>Token Id: {item.token_id}</Text>
-            </Col>
-          );
-        })}
-      </Row>
-    </div>
+                <Text>{item.display_price} ETH</Text>
+                <Space />
+                <Text>Token Id: {item.token_id}</Text>
+              </Col>
+            );
+          })}
+        </Row>
+      </div>
+      {showSellDialog ? (
+        <SellDialog
+          balance={nftBalance}
+          onClose={() => setShowSellDialog(false)}
+        />
+      ) : null}
+    </>
   );
 };
 
