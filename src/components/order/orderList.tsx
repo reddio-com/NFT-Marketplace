@@ -29,7 +29,7 @@ const OrderList = () => {
     },
     {
       onSuccess: async ({ data }) => {
-        const arr = data.data.filter((item) => item.token_id !== '');
+        const arr = data.data.list.filter((item) => item.token_id !== '');
         setOrderList(arr);
         const tokenIds = arr.map((item) => item.token_id).join(',');
         const { data: urls } = await axios.get(
@@ -49,9 +49,10 @@ const OrderList = () => {
     },
     {
       onSuccess: ({ data }) => {
-        if (data.data.length) {
-          const ethBalance = data.data.find((item) => item.type === 'ETH');
-          const erc721Balance = data.data.filter(
+        if (data.error) return;
+        if (data.data.list.length) {
+          const ethBalance = data.data.list.find((item) => item.type === 'ETH');
+          const erc721Balance = data.data.list.filter(
             (item) =>
               item.contract_address === ERC721Address.toLowerCase() &&
               item.balance_available,

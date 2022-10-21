@@ -50,7 +50,7 @@ const Record = ({ onClose, address }: IRecordProps) => {
     },
     {
       onSuccess: ({ data }) => {
-        setRecords(data.data);
+        setRecords(data.data.list);
       },
     },
   );
@@ -100,7 +100,7 @@ const Record = ({ onClose, address }: IRecordProps) => {
                     ? `TokenId: ${record.order.token_id}`
                     : `${record.display_value} ${record.asset_type}`}
                 </Text>
-                <Text>{(new Date(record.time * 1000)).toLocaleString()}</Text>
+                <Text>{new Date(record.time * 1000).toLocaleString()}</Text>
               </div>
             </div>
           ))}

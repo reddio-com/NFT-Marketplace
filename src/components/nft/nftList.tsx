@@ -44,7 +44,7 @@ const NFTList = () => {
     {
       enabled: false,
       onSuccess: async ({ data }) => {
-        const ids = data.data
+        const ids = data.data.list
           .filter((item) => item.balance_available)
           .map((item) => item.token_id);
         if (!ids.length) return;

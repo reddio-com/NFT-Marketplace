@@ -76,12 +76,13 @@ const AccountList = () => {
     },
     {
       onSuccess: ({ data }) => {
-        if (data.data.length && snap.starkKey) {
-          const ethBalance = data.data.find((item) => item.type === 'ETH');
-          const erc20Balance = data.data.find(
+        let list = data.data.list;
+        if (list.length && snap.starkKey) {
+          const ethBalance = list.find((item) => item.type === 'ETH');
+          const erc20Balance = list.find(
             (item) => item.contract_address === ERC20Address.toLowerCase(),
           );
-          const erc721Balance = data.data.filter(
+          const erc721Balance = list.filter(
             (item) =>
               item.contract_address === ERC721Address.toLowerCase() &&
               item.balance_available,

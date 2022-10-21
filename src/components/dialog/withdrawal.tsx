@@ -1,4 +1,4 @@
-import { Dialog, Button, message } from 'tdesign-react';
+import { Button, Dialog, message } from 'tdesign-react';
 import Text from '@/components/typography';
 import styles from './index.less';
 import { useQuery } from '@tanstack/react-query';
@@ -6,11 +6,7 @@ import { reddio } from '@/utils/config';
 import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
 import { useCallback, useState } from 'react';
-import type {
-  RecordResponse,
-  WithdrawalStatusResponse,
-  WithdrawalFromL1Params,
-} from '@reddio.com/js';
+import type { WithdrawalStatusResponse } from '@reddio.com/js';
 import { getEthAddress } from '@/utils/util';
 import { ERC20Address, ERC721Address } from '@/utils/common';
 
@@ -66,19 +62,17 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
         type: item.type,
       };
       if (item.type === 'ERC721') {
-        const assetType = await reddio.utils.getAssetTypeAndId({
+        params.assetType = await reddio.utils.getAssetTypeAndId({
           type: item.type,
           tokenAddress: item.contract_address,
           tokenId: Number(item.token_id),
         });
-        params.assetType = assetType;
         params.tokenId = Number(item.token_id);
       } else {
-        const assetType = await reddio.utils.getAssetTypeAndId({
+        params.assetType = await reddio.utils.getAssetTypeAndId({
           type: item.type,
           tokenAddress: item.contract_address,
         });
-        params.assetType = assetType;
       }
       await reddio.apis.withdrawalFromL1({
         ethAddress: await getEthAddress(),
