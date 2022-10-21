@@ -10,6 +10,7 @@
 - Deposit NFTs/ETH/ERC20 Tokens to Layer 2
 - Transfer NFTs/ETH/ERC20 Tokens between Layer 1 and Layer 2
 - Withdraw NFTs/ETH/ERC20 Tokens from Layer 2
+- Buy/Sell NFTs on Layer 2
 
 ## Getting Started
 
