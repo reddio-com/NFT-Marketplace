@@ -9,8 +9,8 @@
     "start": "npm run dev"
   },
   "dependencies": {
-    "@tanstack/react-query": "^4.3.9",
     "@reddio.com/js": "^0.4.0",
+    "@tanstack/react-query": "^4.3.9",
     "axios": "^0.27.2",
     "ethers": "^5.7.1",
     "normalize.css": "^8.0.1",
