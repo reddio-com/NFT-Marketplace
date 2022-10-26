@@ -15,6 +15,7 @@ import axios from 'axios';
 const NFTList = () => {
   const [searchParams] = useSearchParams();
   const type = searchParams.get('type');
+  const address = searchParams.get('address');
 
   const snap = useSnapshot(store);
   const [tokenIds, setTokenIds] = useState<string[]>([]);
@@ -38,12 +39,13 @@ const NFTList = () => {
     () => {
       return reddio.apis.getBalances({
         starkKey: snap.starkKey,
-        contractAddress: ERC721Address,
+        contractAddress: address || ERC721Address,
       });
     },
     {
       enabled: false,
       onSuccess: async ({ data }) => {
+        if (data.status === 'FAILED') return;
         const ids = data.data.list
           .filter((item) => item.balance_available)
           .map((item) => item.token_id);
@@ -52,7 +54,7 @@ const NFTList = () => {
         const { data: urls } = await axios.get(
           `https://metadata.reddio.com/metadata?token_ids=${ids.join(
             ',',
-          )}&contract_address=${ERC721Address}`,
+          )}&contract_address=${address || ERC721Address}`,
         );
         setUrls(urls.data.map((item: any) => item.image));
       },
@@ -69,7 +71,7 @@ const NFTList = () => {
 
   return (
     <div className={styles.nftListWrapper}>
-      <Back>ERC721</Back>
+      <Back>NFT</Back>
       <div style={{ padding: '0 20px' }}>
         <Row gutter={[20, 24]} className={styles.nftListContent}>
           {type === 'l2'

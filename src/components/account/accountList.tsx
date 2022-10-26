@@ -27,9 +27,11 @@ import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
 import { reddio } from '@/utils/config';
 import Operate from '@/components/dialog/operate';
+import ERC721MDialog from '@/components/dialog/erc721m';
 import { ERC20Address, ERC721Address } from '@/utils/common';
 
-const items = ['GoerliETH', 'ERC20', 'ERC721'];
+const l1Items = ['GoerliETH', 'ERC20', 'ERC721'];
+const l2Items = ['GoerliETH', 'ERC20', 'ERC721', 'ERC721M'];
 
 const AccountList = () => {
   const snap = useSnapshot(store);
@@ -43,12 +45,14 @@ const AccountList = () => {
     GoerliETH: '',
     ERC20: '',
     ERC721: 0,
+    ERC721M: 0,
   });
   const [address, setAddress] = useState('');
   const [dialogInfo, setDialogInfo] = useState({
     show: false,
     type: '',
   });
+  const [showERC721Dialog, setShowERC721Dialog] = useState(false);
   const [loading, setLoading] = useState({
     l1: true,
     l2: true,
@@ -68,7 +72,7 @@ const AccountList = () => {
     },
   );
   const getBalancesQuery = useQuery(
-    ['getBalances', snap.starkKey],
+    ['getBalances', snap.starkKey, snap.erc721MAddress],
     () => {
       return reddio.apis.getBalances({
         starkKey: snap.starkKey,
@@ -76,6 +80,7 @@ const AccountList = () => {
     },
     {
       onSuccess: ({ data }) => {
+        if (data.status === 'FAILED') return;
         let list = data.data.list;
         if (list.length && snap.starkKey) {
           const ethBalance = list.find((item) => item.type === 'ETH');
@@ -85,6 +90,11 @@ const AccountList = () => {
           const erc721Balance = list.filter(
             (item) =>
               item.contract_address === ERC721Address.toLowerCase() &&
+              item.balance_available,
+          );
+          const erc721MBalance = list.filter(
+            (item) =>
+              item.contract_address === snap.erc721MAddress.toLowerCase() &&
               item.balance_available,
           );
           setL2Balance((value) => {
@@ -108,7 +118,9 @@ const AccountList = () => {
               GoerliETH: ethBalance?.display_value,
               ERC20: erc20Balance?.display_value,
               ERC721: erc721Balance.length,
+              ERC721M: erc721MBalance.length,
               tokenIds: erc721Balance,
+              erc721mTokenIds: erc721MBalance,
             };
           });
           setLoading((v) => ({
@@ -180,10 +192,19 @@ const AccountList = () => {
     }));
   }, []);
 
-  const handleClick = useCallback((networkType: string, assetType: string) => {
-    assetType === 'ERC721' &&
-      history.push(`/account/erc721?type=${networkType}`);
-  }, []);
+  const handleClick = useCallback(
+    (networkType: string, assetType: string) => {
+      if (assetType === 'ERC721') {
+        history.push(`/account/erc721?type=${networkType}`);
+      }
+      if (assetType === 'ERC721M') {
+        history.push(
+          `/account/erc721m?type=${networkType}&address=${snap.erc721MAddress}`,
+        );
+      }
+    },
+    [snap.erc721MAddress],
+  );
 
   const handleOperate = useCallback((type: string, isClose = false) => {
     if (isClose) {
@@ -212,13 +233,21 @@ const AccountList = () => {
           onClose={() => handleOperate('', true)}
         />
       ) : null}
-      <Back>Account</Back>
+      {showERC721Dialog ? (
+        <ERC721MDialog onClose={() => setShowERC721Dialog(false)} />
+      ) : null}
+      <Back
+        buttonText="Add ERC721M"
+        handleClick={() => setShowERC721Dialog(true)}
+      >
+        Account
+      </Back>
       <Divider style={{ margin: 0 }} />
       <div className={styles.accountListContent}>
         <div>
           <Text type="bold">L1</Text>
           <div className={styles.listWrapper}>
-            {items.map((item) => {
+            {l1Items.map((item) => {
               return (
                 <div
                   className={styles.listItem}
@@ -248,7 +277,7 @@ const AccountList = () => {
         <div>
           <Text type="bold">L2</Text>
           <div className={styles.listWrapper}>
-            {items.map((item) => {
+            {l2Items.map((item) => {
               return (
                 <div
                   className={styles.listItem}
@@ -258,7 +287,9 @@ const AccountList = () => {
                   <Text color="#2C2C2C">
                     {l2Balance[item]} {item}
                   </Text>
-                  {item === 'ERC721' ? <ChevronRightIcon /> : null}
+                  {item === 'ERC721' || item === 'ERC721M' ? (
+                    <ChevronRightIcon />
+                  ) : null}
                 </div>
               );
             })}
@@ -325,4 +356,5 @@ const AccountList = () => {
   );
 };
 
+// @ts-ignore
 export default AccountList;

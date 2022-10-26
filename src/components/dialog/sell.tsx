@@ -6,19 +6,28 @@ import type { BalanceResponse } from '@reddio.com/js';
 import { reddio } from '@/utils/config';
 import { ERC721Address } from '@/utils/common';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSnapshot } from 'valtio';
+import { store } from '@/utils/store';
 
 const FormItem = Form.FormItem;
 
 interface IOperateProps {
   onClose: () => void;
-  balance: BalanceResponse[];
+  balance: {
+    ERC721: BalanceResponse[];
+    ERC721M: BalanceResponse[];
+  };
 }
 
 const Sell = (props: IOperateProps) => {
   const { onClose, balance } = props;
+  const snap = useSnapshot(store);
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
+  const [selectedType, setSelectedType] = useState<'ERC721' | 'ERC721M'>(
+    'ERC721',
+  );
 
   const rules = useMemo<any>(() => {
     return {
@@ -34,24 +43,25 @@ const Sell = (props: IOperateProps) => {
   }, []);
 
   const options = useMemo(() => {
-    return balance.map((item: any) => ({
+    return balance[selectedType].map((item: any) => ({
       label: item.token_id,
       value: item.token_id,
     }));
-  }, [balance]);
+  }, [balance, selectedType]);
 
   const submit = useCallback(async () => {
     const error = await form.validate?.();
     if (error && Object.keys(error).length) return;
     setLoading(true);
+    const type = form.getFieldValue?.('type');
     const keypair = await reddio.keypair.generateFromEthSignature();
     const params = await reddio.utils.getOrderParams({
       keypair,
       amount: '1',
-      tokenAddress: ERC721Address,
+      tokenAddress: type === 'ERC721' ? ERC721Address : snap.erc721MAddress,
       tokenId: form.getFieldValue?.('tokenId'),
       orderType: 'sell',
-      tokenType: 'ERC721',
+      tokenType: type,
       price: form.getFieldValue?.('price').toString(),
       marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7',
     });
@@ -92,7 +102,22 @@ const Sell = (props: IOperateProps) => {
           preventSubmitDefault
           showErrorMessage
           rules={rules}
+          onValuesChange={(changedValues) => {
+            if (changedValues.type) {
+              form.reset?.({ fields: ['tokenId'] });
+              setSelectedType(changedValues.type as any);
+            }
+          }}
         >
+          <FormItem label="Asset Type" name="type" initialData="ERC721">
+            <Select
+              clearable
+              options={[
+                { label: 'ERC721', value: 'ERC721' },
+                { label: 'ERC721M', value: 'ERC721M' },
+              ]}
+            />
+          </FormItem>
           <FormItem label="Token Id" name="tokenId">
             <Select clearable options={options} />
           </FormItem>

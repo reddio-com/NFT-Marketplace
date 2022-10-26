@@ -17,7 +17,10 @@ const OrderList = () => {
   const [orderList, setOrderList] = useState<OrderListResponse[]>([]);
   const [images, setImages] = useState<any[]>([]);
   const [ethBalance, setEthBalance] = useState(0);
-  const [nftBalance, setNftBalance] = useState<BalanceResponse[]>([]);
+  const [nftBalance, setNftBalance] = useState<{
+    ERC721: BalanceResponse[];
+    ERC721M: BalanceResponse[];
+  }>({ ERC721: [], ERC721M: [] });
   const [showSellDialog, setShowSellDialog] = useState(false);
 
   const orderListQuery = useQuery(
@@ -57,8 +60,16 @@ const OrderList = () => {
               item.contract_address === ERC721Address.toLowerCase() &&
               item.balance_available,
           );
+          const erc721MBalance = data.data.list.filter(
+            (item) =>
+              item.contract_address === snap.erc721MAddress.toLowerCase() &&
+              item.balance_available,
+          );
           ethBalance && setEthBalance(ethBalance.balance_available);
-          setNftBalance(erc721Balance);
+          setNftBalance({
+            ERC721: erc721Balance,
+            ERC721M: erc721MBalance,
+          });
         }
       },
     },
