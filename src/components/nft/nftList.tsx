@@ -47,7 +47,7 @@ const NFTList = () => {
       onSuccess: async ({ data }) => {
         if (data.status === 'FAILED') return;
         let ids: any[] = [];
-        if (address) {
+        if (searchParams.get('address') !== null) {
           ids = data.data.list
             .filter(
               (item) =>
