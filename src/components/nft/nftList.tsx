@@ -46,12 +46,23 @@ const NFTList = () => {
       enabled: false,
       onSuccess: async ({ data }) => {
         if (data.status === 'FAILED') return;
-        const ids = data.data.list
-          .filter(
-            (item) =>
-              item.balance_available && item.contract_address === address,
-          )
-          .map((item) => item.token_id);
+        let ids: any[] = [];
+        if (address) {
+          ids = data.data.list
+            .filter(
+              (item) =>
+                item.balance_available && item.contract_address === address,
+            )
+            .map((item) => item.token_id);
+        } else {
+          ids = data.data.list
+            .filter(
+              (item) =>
+                item.balance_available &&
+                item.contract_address === ERC721Address,
+            )
+            .map((item) => item.token_id);
+        }
         if (!ids.length) return;
         setTokenIds(ids);
         const { data: urls } = await axios.get(
