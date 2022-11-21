@@ -32,7 +32,9 @@ const OrderList = () => {
     },
     {
       onSuccess: async ({ data }) => {
-        const arr = data.data.list.filter((item) => item.token_id !== '');
+        const arr = data.data.list
+          .filter((item) => item.token_id !== '')
+          .filter((item) => item.symbol.base_token_name === 'ETH');
         setOrderList(arr);
         const tokenIds = arr.map((item) => item.token_id).join(',');
         const { data: urls } = await axios.get(
@@ -140,7 +142,9 @@ const OrderList = () => {
                     Buy
                   </Button>
                 </div>
-                <Text>{item.display_price} ETH</Text>
+                <Text>
+                  {item.display_price} {item.symbol.base_token_name}
+                </Text>
                 <Space />
                 <Text>Token Id: {item.token_id}</Text>
               </Col>
