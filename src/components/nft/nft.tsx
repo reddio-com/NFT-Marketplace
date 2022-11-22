@@ -22,7 +22,8 @@ const NFT = ({ tokenId, type, baseUri }: INFTPros) => {
     type === 'l1' && init();
     if (baseUri) {
       const getCustomData = async () => {
-        const uri = `${baseUri}/${Number(tokenId!)}`;
+        const base = baseUri.endsWith('/') ? baseUri : baseUri + '/';
+        const uri = `${base}${Number(tokenId!)}`;
         const { data } = await axios.get(uri);
         setImageUrl(data.image);
       };
