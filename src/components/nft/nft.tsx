@@ -7,13 +7,12 @@ import axios from 'axios';
 
 interface INFTPros {
   tokenId?: string;
-  image?: string;
   type: string;
   baseUri?: string;
 }
 
-const NFT = ({ tokenId, image, type, baseUri }: INFTPros) => {
-  const [imageUrl, setImageUrl] = useState(image);
+const NFT = ({ tokenId, type, baseUri }: INFTPros) => {
+  const [imageUrl, setImageUrl] = useState('');
   useEffect(() => {
     const init = async () => {
       const uri = await getTokenURI(Number(tokenId!));
@@ -23,7 +22,7 @@ const NFT = ({ tokenId, image, type, baseUri }: INFTPros) => {
     type === 'l1' && init();
     if (baseUri) {
       const getCustomData = async () => {
-        const uri = `${baseUri}${Number(tokenId!)}`;
+        const uri = `${baseUri}/${Number(tokenId!)}`;
         const { data } = await axios.get(uri);
         setImageUrl(data.image);
       };
