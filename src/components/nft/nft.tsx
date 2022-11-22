@@ -9,9 +9,10 @@ interface INFTPros {
   tokenId?: string;
   image?: string;
   type: string;
+  baseUri?: string;
 }
 
-const NFT = ({ tokenId, image, type }: INFTPros) => {
+const NFT = ({ tokenId, image, type, baseUri }: INFTPros) => {
   const [imageUrl, setImageUrl] = useState(image);
   useEffect(() => {
     const init = async () => {
@@ -20,7 +21,15 @@ const NFT = ({ tokenId, image, type }: INFTPros) => {
       setImageUrl(data.image);
     };
     type === 'l1' && init();
-  });
+    if (baseUri) {
+      const getCustomData = async () => {
+        const uri = `${baseUri}${Number(tokenId!)}`;
+        const { data } = await axios.get(uri);
+        setImageUrl(data.image);
+      };
+      getCustomData();
+    }
+  }, []);
 
   return (
     <Col flex="190px" className={styles.nft}>

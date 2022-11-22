@@ -19,6 +19,7 @@ const NFTList = () => {
 
   const snap = useSnapshot(store);
   const [tokenIds, setTokenIds] = useState<string[]>([]);
+  const [baseUri, setBaseUri] = useState('');
   const [urls, setUrls] = useState<string[]>([]);
 
   const getL1ERC721Query = useQuery(
@@ -54,6 +55,8 @@ const NFTList = () => {
                 item.balance_available && item.contract_address === address,
             )
             .map((item) => item.token_id);
+          // @ts-ignore
+          if (ids.length) setBaseUri(data.data.list[0].base_uri);
         } else {
           ids = data.data.list
             .filter(
@@ -96,6 +99,7 @@ const NFTList = () => {
                     image={item}
                     tokenId={tokenIds[index]}
                     type={type}
+                    baseUri={baseUri}
                   />
                 );
               })
