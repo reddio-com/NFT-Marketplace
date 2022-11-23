@@ -1099,10 +1099,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.6.tgz#cee20bd55e68a1720bdab363ecf0c821ded4cd45"
   integrity sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==
 
-"@reddio.com/js@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@reddio.com/js/-/js-0.4.0.tgz#ff4d5a84f9e48965c4f89bf97d2b966da9175942"
-  integrity sha512-Jz/qRaX0x739fWrSDXxQkSXv4Ae/JZWvfxm58Lb2+FnKXTSD/9CvQnApgvED+7r6rXa2cJBgmndtI+Z8y+IkVQ==
+"@reddio.com/js@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@reddio.com/js/-/js-0.4.1.tgz#d9c84d767d95e7f692eb084e78618598dc30679b"
+  integrity sha512-Jic46NZTDomaGkgLncCCzO4NBsGGH9L6vegCUjwZVKvZKJMvb5gmaa5vZOxHgAdhvLHx01AFFvrNdl8qBzrR7A==
   dependencies:
     "@starkware-industries/starkware-crypto-utils" "^0.0.2"
     assert "^2.0.0"
@@ -1702,11 +1702,6 @@
     "@umijs/utils" "4.0.24"
     enhanced-resolve "5.9.3"
     is-equal "^1.6.4"
-
-"@umijs/plugin-analytics@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@umijs/plugin-analytics/-/plugin-analytics-0.2.3.tgz#d10c08806b8d6ac697b11d4d8b3ec4d5ad52a41b"
-  integrity sha512-6Fj+EOzd2vXe1YHjK1aqhHlITWBXcnhPd6pxAEjeGu3vAxDcfp1yM3PoRr//baBXk8CYF2krWDQGYy+OlRXM4A==
 
 "@umijs/plugin-run@4.0.24":
   version "4.0.24"
