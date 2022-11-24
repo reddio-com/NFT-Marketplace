@@ -2,7 +2,6 @@ import { Dialog, Form, Input, Button } from 'tdesign-react';
 import Text from '../typography';
 import styles from './index.less';
 import { useCallback, useMemo } from 'react';
-import { addErc721MAddress } from '@/utils/store';
 
 const FormItem = Form.FormItem;
 
@@ -25,7 +24,6 @@ const ERC721MDialog = (props: IOperateProps) => {
   const submit = useCallback(async () => {
     const error = await form.validate?.();
     if (error && Object.keys(error).length) return;
-    addErc721MAddress(form.getFieldValue?.('address'));
     onClose();
   }, []);
 

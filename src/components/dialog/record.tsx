@@ -98,7 +98,7 @@ const Record = ({ onClose, address }: IRecordProps) => {
                 <Text>
                   {'order' in record
                     ? `TokenId: ${record.order.token_id}`
-                    : `${record.display_value} ${record.asset_type}`}
+                    : `${record.display_value} ${record.asset_name}`}
                 </Text>
                 <Text>{new Date(record.time * 1000).toLocaleString()}</Text>
               </div>

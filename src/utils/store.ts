@@ -8,8 +8,3 @@ export const store = proxy<{ starkKey: string; erc721MAddress: string }>({
 export const addStarkKey = (starkKey: string) => {
   store.starkKey = starkKey;
 };
-
-export const addErc721MAddress = (address: string) => {
-  store.erc721MAddress = address;
-  window.localStorage.setItem('erc721m', address);
-};
