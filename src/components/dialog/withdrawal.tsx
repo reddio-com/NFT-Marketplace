@@ -31,26 +31,14 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
     },
     {
       onSuccess: ({ data }) => {
-        const array = data.data
-          .filter((item) => item.contract_address === 'eth')
-          .concat(
-            data.data.filter(
-              (item) => item.contract_address === ERC20Address.toLowerCase(),
-            ),
-          )
-          .concat(
-            data.data.filter(
-              (item) => item.contract_address === ERC721Address.toLowerCase(),
-            ),
-          );
-        setStatus(array);
+        setStatus(data.data);
       },
     },
   );
 
   const getText = useCallback((item: WithdrawalStatusResponse) => {
-    if (item.type === 'ERC721') {
-      return `TokenId: ${item.token_id}`;
+    if (item.type === 'ERC721' || item.type === 'ERC721M') {
+      return `${item.symbol} - TokenId: ${item.token_id}`;
     }
     return `${item.display_value} ${item.type}`;
   }, []);
@@ -61,7 +49,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
         ethAddress: await getEthAddress(),
         type: item.type,
       };
-      if (item.type === 'ERC721') {
+      if (item.type === 'ERC721' || item.type === 'ERC721M') {
         params.assetType = await reddio.utils.getAssetTypeAndId({
           type: item.type,
           tokenAddress: item.contract_address,

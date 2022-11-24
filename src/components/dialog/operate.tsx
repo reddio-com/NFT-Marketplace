@@ -130,9 +130,12 @@ const Operate = (props: IOperateProps) => {
   }, [l2Balance, type]);
 
   const isERC721 = useMemo(() => {
+    if (type === 'Deposit') {
+      return form.getFieldValue?.('type') === 'ERC721';
+    }
     const item = l2Balance.find((item) => item.contract_address === selectType);
     return item && (item.type === 'ERC721' || item.type === 'ERC721M');
-  }, [selectType, l2Balance]);
+  }, [selectType, l2Balance, type]);
 
   const showNotification = useCallback((content: string) => {
     const notification = NotificationPlugin.success({
@@ -181,7 +184,7 @@ const Operate = (props: IOperateProps) => {
         setLoading(true);
         const { starkKey } = store;
         const quantizedAmount = form.getFieldValue?.('amount');
-        if (type === 'ETH') {
+        if (type === 'GoerliETH') {
           await reddio.apis.depositETH({
             starkKey,
             quantizedAmount,
@@ -294,7 +297,7 @@ const Operate = (props: IOperateProps) => {
         if (buttonText === 'Approve') {
           approve();
         } else {
-          deposit(assetType);
+          deposit(selectType);
         }
         return;
       }
