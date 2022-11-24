@@ -13,8 +13,7 @@ import { store } from '@/utils/store';
 import { useCallback, useMemo, useState } from 'react';
 import { reddio } from '@/utils/config';
 import { ERC20Address, ERC721Address } from '@/utils/common';
-import type { SignTransferParams } from '@reddio.com/js';
-import { BigNumber, ethers } from 'ethers';
+import type { SignTransferParams, BalancesV2Response } from '@reddio.com/js';
 
 const FormItem = Form.FormItem;
 
@@ -23,7 +22,7 @@ interface IOperateProps {
   ethAddress: string;
   onClose: () => void;
   l1Balance: Record<string, any>;
-  l2Balance: Record<string, any>;
+  l2Balance: BalancesV2Response[];
 }
 
 const Operate = (props: IOperateProps) => {
@@ -52,8 +51,9 @@ const Operate = (props: IOperateProps) => {
     if (type === 'Deposit') {
       return l1Balance[selectType || 'GoerliETH'];
     }
-    return l2Balance[selectType || 'GoerliETH'];
-  }, [selectType, l1Balance, type]);
+    const item = l2Balance.find((item) => item.contract_address === selectType);
+    return item ? item.display_value : '';
+  }, [selectType, l1Balance, type, l2Balance]);
 
   const balanceValidator = useCallback(
     (val: string) => {
@@ -100,18 +100,39 @@ const Operate = (props: IOperateProps) => {
     return type;
   }, [type, needApprove]);
 
-  const options = useMemo(() => {
+  const tokenIds = useMemo(() => {
     if (type === 'Deposit') {
       return l1Balance.tokenIds.map((item: any) => ({
         label: item,
         value: item,
       }));
     }
-    return l2Balance.tokenIds.map((item: any) => ({
-      label: item.token_id,
-      value: item.token_id,
-    }));
-  }, [type, l1Balance, l2Balance]);
+    const item = l2Balance.find((item) => item.contract_address === selectType);
+    if (item && (item.type === 'ERC721' || item.type === 'ERC721M')) {
+      return item.available_token_ids.map((id) => ({ label: id, value: id }));
+    }
+    return [];
+  }, [type, l1Balance, l2Balance, selectType]);
+
+  const options = useMemo(() => {
+    if (type === 'Deposit') {
+      return [
+        { label: 'GoerliETH', value: 'GoerliETH' },
+        { label: 'ERC20', value: 'ERC20' },
+        { label: 'ERC721', value: 'ERC721' },
+      ];
+    } else {
+      return l2Balance.map((item) => ({
+        label: item.symbol,
+        value: item.contract_address,
+      }));
+    }
+  }, [l2Balance, type]);
+
+  const isERC721 = useMemo(() => {
+    const item = l2Balance.find((item) => item.contract_address === selectType);
+    return item && (item.type === 'ERC721' || item.type === 'ERC721M');
+  }, [selectType, l2Balance]);
 
   const showNotification = useCallback((content: string) => {
     const notification = NotificationPlugin.success({
@@ -192,6 +213,7 @@ const Operate = (props: IOperateProps) => {
   const transfer = useCallback(
     async (type: any) => {
       try {
+        console.log(type, '=======');
         setLoading(true);
         const { starkKey } = store;
         const amount = form.getFieldValue?.('amount');
@@ -206,10 +228,10 @@ const Operate = (props: IOperateProps) => {
           type,
         };
         if (type === 'ERC20') {
-          params.contractAddress = ERC20Address;
+          params.contractAddress = selectType;
         }
-        if (type === 'ERC721') {
-          params.contractAddress = ERC721Address;
+        if (type === 'ERC721' || type === 'ERC721M') {
+          params.contractAddress = selectType;
           params.tokenId = tokenId;
         }
         await reddio.apis.transfer(params);
@@ -221,7 +243,7 @@ const Operate = (props: IOperateProps) => {
         setLoading(false);
       }
     },
-    [store, form],
+    [store, form, selectType],
   );
 
   const withdrawal = useCallback(
@@ -241,10 +263,10 @@ const Operate = (props: IOperateProps) => {
           type,
         };
         if (type === 'ERC20') {
-          params.contractAddress = ERC20Address;
+          params.contractAddress = selectType;
         }
-        if (type === 'ERC721') {
-          params.contractAddress = ERC721Address;
+        if (type === 'ERC721' || type === 'ERC721M') {
+          params.contractAddress = selectType;
           params.tokenId = tokenId;
         }
         await reddio.apis.withdrawalFromL2(params);
@@ -258,13 +280,15 @@ const Operate = (props: IOperateProps) => {
         setLoading(false);
       }
     },
-    [store, form],
+    [store, form, selectType],
   );
 
   const submit = useCallback(async () => {
     const error = await form.validate?.();
     if (error && Object.keys(error).length) return;
-    const assetType = selectType === 'GoerliETH' ? 'ETH' : selectType;
+    const assetType = l2Balance.find(
+      (item) => item.contract_address === selectType,
+    )?.type;
     switch (type) {
       case 'Deposit': {
         if (buttonText === 'Approve') {
@@ -319,21 +343,15 @@ const Operate = (props: IOperateProps) => {
             if (changedValues.type) {
               setNeedApprove(changedValues.type !== 'GoerliETH');
               setSelectType(changedValues.type as any);
+              form.reset?.({ type: 'initial', fields: ['amount', 'tokenId'] });
             }
             if (changedValues.tokenId) {
               setNeedApprove(true);
             }
           }}
         >
-          <FormItem label="Asset Type" name="type" initialData="GoerliETH">
-            <Select
-              clearable
-              options={[
-                { label: 'GoerliETH', value: 'GoerliETH' },
-                { label: 'ERC20', value: 'ERC20' },
-                { label: 'ERC721', value: 'ERC721' },
-              ]}
-            />
+          <FormItem label="Asset Type" name="type">
+            <Select clearable options={options} />
           </FormItem>
           <FormItem
             initialData={
@@ -350,9 +368,9 @@ const Operate = (props: IOperateProps) => {
           >
             <Input size="medium" status="default" type="text" />
           </FormItem>
-          {form.getFieldValue?.('type') === 'ERC721' ? (
+          {isERC721 ? (
             <FormItem label="Token Id" name="tokenId">
-              <Select clearable options={options} />
+              <Select clearable options={tokenIds} />
             </FormItem>
           ) : (
             <FormItem label="Amount" name="amount">
@@ -360,9 +378,7 @@ const Operate = (props: IOperateProps) => {
             </FormItem>
           )}
         </Form>
-        {form.getFieldValue?.('type') !== 'ERC721' ? (
-          <Text>Balance: {balance}</Text>
-        ) : null}
+        {!isERC721 ? <Text>Balance: {balance}</Text> : null}
         <div className={styles.buttonWrapper}>
           <Button theme="default" shape="round" size="large" onClick={onClose}>
             Cancel
