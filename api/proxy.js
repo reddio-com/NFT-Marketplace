@@ -7,7 +7,9 @@ app.use(express.json());
 app.get('/api/token', async (req, res) => {
   try {
     const { tokenId, baseUrl } = req.query;
-    const { data } = await axios.get(`${baseUrl}/${tokenId}`);
+    const { data } = await axios.get(
+      `${decodeURIComponent(baseUrl)}/${tokenId}`,
+    );
     res.setHeader('Content-Type', 'application/json');
     res.writeHead(200);
     res.end(data);
