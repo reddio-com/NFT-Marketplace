@@ -8,11 +8,11 @@ app.get('/api/token', async (req, res) => {
   try {
     const { tokenId, baseUrl } = req.query;
     const { data } = await axios.get(
-      `${decodeURIComponent(baseUrl)}/${tokenId}`,
+      `${decodeURIComponent(baseUrl)}${tokenId}`,
     );
     res.setHeader('Content-Type', 'application/json');
     res.writeHead(200);
-    res.end(data);
+    res.end(JSON.stringify(data));
   } catch (error) {
     console.error(error);
     res.setHeader('Content-Type', 'application/json');
