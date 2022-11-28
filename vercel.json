@@ -1,7 +1,7 @@
 {
   "routes": [
     {
-      "src": "/api/token",
+      "src": "/api/token(.*)",
       "dest": "/api/proxy.js",
       "continue": true
     }
