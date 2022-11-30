@@ -12,6 +12,34 @@ import { addStarkKey } from '@/utils/store';
 
 const queryClient = new QueryClient();
 
+const footerIconLinks =  [
+  {
+    label: 'Linkedin',
+    href: 'https://www.linkedin.com/company/reddio',
+    img: require('@/assets/footerIcon/social/linkedin.png'),
+  },
+  {
+    label: 'Github',
+    href: 'https://github.com/reddio-com/NFT-Marketplace',
+    img: require('@/assets/footerIcon/social/github.png'),
+  },
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com/reddiocom',
+    img: require('@/assets/footerIcon/social/facebook.png'),
+  },
+  {
+    label: 'Twitter',
+    href: 'https://twitter.com/reddio_com',
+    img: require('@/assets/footerIcon/social/twitter.png'),
+  },
+  {
+    label: 'Discord',
+    href: 'https://discord.gg/SjNAJ4qkK3',
+    img: require('@/assets/footerIcon/social/discord.png'),
+  },
+]
+
 export default function Layout() {
   const [isFirst, setFirst] = useState(
     !Boolean(window.localStorage.getItem('isFirst')),
@@ -50,6 +78,16 @@ export default function Layout() {
             </>
           )}
         </div>
+        <footer className={styles.footer}>
+          <div>
+            {
+              footerIconLinks.map((icon) => {
+                return <img src={icon.img} className={styles.icon} onClick={() => window.open(icon.href, '__blank')}/>
+              })
+            }
+          </div>
+          <div className={styles.footerInfo}>Copyright © ${new Date().getFullYear()} Reddio. All rights reserved.</div>
+        </footer>
       </div>
     </QueryClientProvider>
   );
