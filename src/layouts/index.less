@@ -1,7 +1,7 @@
 .layout {
   & > header {
     height: 52px;
-    background: #ffffff;
+    background: #252547;
     display: flex;
     align-items: center;
     padding-left: 24px;
@@ -12,8 +12,8 @@
     justify-content: center;
     align-items: center;
     padding: 24px 0;
-    background: #f3f3f3;
-    height: calc(100vh - 52px);
+    background: #eff1f8;
+    height: calc(100vh - 152px);
     box-sizing: border-box;
     position: relative;
 
@@ -23,6 +23,27 @@
       height: 100%;
       display: flex;
       flex-direction: column;
+    }
+  }
+
+  .footer {
+    height: 100px;
+    background-color: #252547;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .icon {
+      width: 40px;
+      height: 40px;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+
+    .footerInfo {
+      margin-top: 10px;
+      color: #ffffff;
     }
   }
 }
