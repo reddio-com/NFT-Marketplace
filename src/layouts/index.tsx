@@ -12,7 +12,7 @@ import { addStarkKey } from '@/utils/store';
 
 const queryClient = new QueryClient();
 
-const footerIconLinks =  [
+const footerIconLinks = [
   {
     label: 'Linkedin',
     href: 'https://www.linkedin.com/company/reddio',
@@ -82,11 +82,11 @@ export default function Layout() {
           <div>
             {
               footerIconLinks.map((icon) => {
-                return <img src={icon.img} className={styles.icon} onClick={() => window.open(icon.href, '__blank')}/>
+                return <img src={icon.img} className={styles.icon} onClick={() => window.open(icon.href, '__blank')} />
               })
             }
           </div>
-          <div className={styles.footerInfo}>Copyright © ${new Date().getFullYear()} Reddio. All rights reserved.</div>
+          <div className={styles.footerInfo}>Copyright © {new Date().getFullYear()} Reddio. All rights reserved.</div>
         </footer>
       </div>
     </QueryClientProvider>
