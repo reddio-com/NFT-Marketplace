@@ -10,6 +10,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initReddio, reddio } from '@/utils/config';
 import { addStarkKey } from '@/utils/store';
 
+import Alert from '@mui/material/Alert';
+
 const queryClient = new QueryClient();
 
 const footerIconLinks = [
@@ -45,6 +47,8 @@ export default function Layout() {
     !Boolean(window.localStorage.getItem('isFirst')),
   );
 
+  const [openAlert, setOpenAlert] = useState(true);
+
   const handleSuccess = useCallback(() => {
     setFirst(false);
     initReddio();
@@ -72,7 +76,10 @@ export default function Layout() {
           ) : (
             <>
               <div className={styles.contentWrapper}>
-                <AccountHeader />
+                <AccountHeader showAlert={openAlert} />
+                {
+                  openAlert && <Alert severity="info" onClose={() => setOpenAlert(false)}>Your transaction is going to be submitted to Layer2 and will be proved on L1</Alert>
+                }
                 <Outlet />
               </div>
             </>
