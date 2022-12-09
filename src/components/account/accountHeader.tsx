@@ -12,11 +12,17 @@ import Record from '@/components/dialog/record';
 import Withdrawal from '@/components/dialog/withdrawal';
 import { initReddio, isVercel, reddio } from '@/utils/config';
 
-const AccountHeader = () => {
+interface AccountHeaderProps {
+  showAlert: boolean;
+}
+
+const AccountHeader = (props: AccountHeaderProps) => {
   const snap = useSnapshot(store);
   const [address, setAddress] = useState('');
   const [showRecord, setShowRecord] = useState(false);
   const [showWithdrawal, setShowWithdrawal] = useState(false);
+
+  const { showAlert } = props;
 
   const getAddress = useCallback(async () => {
     setAddress(await getEthAddress());
@@ -54,7 +60,7 @@ const AccountHeader = () => {
   }, []);
 
   return (
-    <div className={styles.accountHeaderWrapper}>
+    <div className={styles.accountHeaderWrapper} style={{ marginBottom: showAlert ? '20px' : '0' }}>
       {showRecord ? (
         <Record address={address} onClose={() => setShowRecord(false)} />
       ) : null}
