@@ -202,7 +202,7 @@ const Operate = (props: IOperateProps) => {
             tokenAddress: ERC721Address,
           });
         }
-        showNotification('Deposit is successful, please wait for the arrival');
+        showNotification('Deposit is successful, please wait 3 - 5 minutes for the arrival');
         setLoading(false);
         onClose();
       } catch (e) {
