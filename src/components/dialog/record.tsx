@@ -7,6 +7,7 @@ import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
 import { useState } from 'react';
 import type { RecordResponse } from '@reddio.com/js';
+import dayjs from 'dayjs';
 
 interface IRecordProps {
   address: string;
@@ -18,8 +19,8 @@ const recordType = [
   'Deposit',
   'Mint',
   'TransferFrom',
-  'WithDraw',
-  'FullWithDraw',
+  'Withdraw',
+  'FullWithdraw',
   'TransferAll',
   'ASKOrder',
   'BIDOrder',
@@ -100,7 +101,7 @@ const Record = ({ onClose, address }: IRecordProps) => {
                     ? `TokenId: ${record.order.token_id}`
                     : `${record.display_value} ${record.asset_name}`}
                 </Text>
-                <Text>{new Date(record.time * 1000).toLocaleString()}</Text>
+                <Text>{dayjs(record.time * 1000).format('YYYY/MM/DD')}</Text>
               </div>
             </div>
           ))}
