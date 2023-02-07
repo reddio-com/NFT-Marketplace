@@ -50,6 +50,7 @@ const OrderList = () => {
     () => {
       return reddio.apis.getBalances({
         starkKey: snap.starkKey,
+        limit: 10000
       });
     },
     {
