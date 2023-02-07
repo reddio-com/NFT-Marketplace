@@ -11,4 +11,5 @@ export default {
       async: true,
     },
   ],
+  title: 'Reddio Demos'
 };
