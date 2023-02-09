@@ -202,7 +202,9 @@ const Operate = (props: IOperateProps) => {
             tokenAddress: ERC721Address,
           });
         }
-        showNotification('Deposit is successful, please wait 3 - 5 minutes for the arrival');
+        showNotification(
+          'Deposit is successful, please wait 3 - 5 minutes for the arrival',
+        );
         setLoading(false);
         onClose();
       } catch (e) {
@@ -394,7 +396,8 @@ const Operate = (props: IOperateProps) => {
           <div className={styles.infoWrapper}>
             <InfoCircleFilledIcon />
             <Text>
-              Wait approximately 4 hours for funds move to the withdrawal area.
+              Wait approximately 4 ~ 8 hours for funds move to the withdrawal
+              area.
             </Text>
           </div>
         ) : null}
