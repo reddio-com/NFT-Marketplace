@@ -50,7 +50,7 @@ const OrderList = () => {
     () => {
       return reddio.apis.getBalances({
         starkKey: snap.starkKey,
-        limit: 10000
+        limit: 10000,
       });
     },
     {
@@ -81,7 +81,9 @@ const OrderList = () => {
   const buy = useCallback(
     async (order: OrderListResponse) => {
       if (ethBalance < Number(order.price)) {
-        message.error('Insufficient balance');
+        message.error(
+          'Layer2 balance insufficient, you should deposit enough ETH first',
+        );
         return;
       }
       const keypair = await reddio.keypair.generateFromEthSignature();
