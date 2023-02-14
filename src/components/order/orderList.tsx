@@ -183,7 +183,9 @@ const OrderList = () => {
         onConfirm={() => buy(wantBuy!)}
         onCancel={() => setShowBuyDialog(false)}
       >
-        <p>Do you want to buy the NFT for {wantBuy?.display_price} ETH?</p>
+        <p>
+          Do you want to buy the NFT for <b>{wantBuy?.display_price}</b> ETH?
+        </p>
       </Dialog>
     </>
   );
