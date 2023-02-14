@@ -2,8 +2,8 @@
   "private": true,
   "author": "KieSun <zx597813039@gmail.com>",
   "scripts": {
-    "dev": "cross-env IS_VERCEL=1 umi dev",
     "build": "umi build",
+    "dev": "cross-env IS_VERCEL=1 umi dev",
     "postinstall": "umi setup",
     "setup": "umi setup",
     "start": "npm run dev"
@@ -12,7 +12,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mui/material": "^5.10.17",
-    "@reddio.com/js": "^0.4.2",
+    "@reddio.com/js": "^0.4.5",
     "@tanstack/react-query": "^4.3.9",
     "axios": "^0.27.2",
     "dayjs": "^1.11.7",

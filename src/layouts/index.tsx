@@ -40,7 +40,7 @@ const footerIconLinks = [
     href: 'https://discord.gg/SjNAJ4qkK3',
     img: require('@/assets/footerIcon/social/discord.png'),
   },
-]
+];
 
 export default function Layout() {
   const [isFirst, setFirst] = useState(
@@ -57,7 +57,8 @@ export default function Layout() {
   useEffect(() => {
     const init = async () => {
       initReddio();
-      const { publicKey, privateKey } = await reddio.keypair.generateFromEthSignature();
+      const { publicKey, privateKey } =
+        await reddio.keypair.generateFromEthSignature();
       console.log(publicKey, privateKey);
       addStarkKey(publicKey);
     };
@@ -77,9 +78,12 @@ export default function Layout() {
             <>
               <div className={styles.contentWrapper}>
                 <AccountHeader showAlert={openAlert} />
-                {
-                  openAlert && <Alert severity="info" onClose={() => setOpenAlert(false)}>Your transaction is going to be submitted to Layer2 and will be proved on L1</Alert>
-                }
+                {openAlert && (
+                  <Alert severity="info" onClose={() => setOpenAlert(false)}>
+                    Your transaction is going to be submitted to Layer2 and will
+                    be proved on L1
+                  </Alert>
+                )}
                 <Outlet />
               </div>
             </>
@@ -87,13 +91,20 @@ export default function Layout() {
         </div>
         <footer className={styles.footer}>
           <div>
-            {
-              footerIconLinks.map((icon) => {
-                return <img src={icon.img} className={styles.icon} onClick={() => window.open(icon.href, '__blank')} />
-              })
-            }
+            {footerIconLinks.map((icon, index) => {
+              return (
+                <img
+                  key={index}
+                  src={icon.img}
+                  className={styles.icon}
+                  onClick={() => window.open(icon.href, '__blank')}
+                />
+              );
+            })}
           </div>
-          <div className={styles.footerInfo}>Copyright © {new Date().getFullYear()} Reddio. All rights reserved.</div>
+          <div className={styles.footerInfo}>
+            Copyright © {new Date().getFullYear()} Reddio. All rights reserved.
+          </div>
         </footer>
       </div>
     </QueryClientProvider>

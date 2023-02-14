@@ -1,4 +1,4 @@
-import { Button, Row, Col, message, Image, Space } from 'tdesign-react';
+import { Button, Row, Col, message, Image, Space, Dialog } from 'tdesign-react';
 import { ShopIcon } from 'tdesign-icons-react';
 import Text from '../typography';
 import styles from './index.less';
@@ -22,6 +22,8 @@ const OrderList = () => {
     ERC721M: BalanceResponse[];
   }>({ ERC721: [], ERC721M: [] });
   const [showSellDialog, setShowSellDialog] = useState(false);
+  const [showBuyDialog, setShowBuyDialog] = useState(false);
+  const [wantBuy, setWantBuy] = useState<OrderListResponse | null>(null);
 
   const orderListQuery = useQuery(
     ['orderList'],
@@ -78,11 +80,20 @@ const OrderList = () => {
     },
   );
 
+  const handleBuyClick = useCallback((item: OrderListResponse) => {
+    setWantBuy(item);
+    setShowBuyDialog(true);
+  }, []);
+
   const buy = useCallback(
     async (order: OrderListResponse) => {
+      if (order.stark_key === snap.starkKey) {
+        message.error('You can not buy your own NFT!');
+        return;
+      }
       if (ethBalance < Number(order.price)) {
         message.error(
-          'Layer2 balance insufficient, you should deposit enough ETH first',
+          'Layer2 balance insufficient, you should deposit enough ETH first!',
         );
         return;
       }
@@ -100,8 +111,9 @@ const OrderList = () => {
       await reddio.apis.order(params);
       orderListQuery.refetch();
       message.success('Buy Success');
+      setShowBuyDialog(false);
     },
-    [ethBalance],
+    [ethBalance, snap.starkKey],
   );
 
   return (
@@ -140,7 +152,7 @@ const OrderList = () => {
                     icon={<ShopIcon />}
                     shape="round"
                     disabled={!snap.starkKey}
-                    onClick={() => buy(item)}
+                    onClick={() => handleBuyClick(item)}
                   >
                     Buy
                   </Button>
@@ -161,6 +173,18 @@ const OrderList = () => {
           onClose={() => setShowSellDialog(false)}
         />
       ) : null}
+      <Dialog
+        header="Buy NFT"
+        visible={showBuyDialog}
+        confirmOnEnter
+        cancelBtn="Cancel"
+        confirmBtn="Confirm"
+        onClose={() => setShowBuyDialog(false)}
+        onConfirm={() => buy(wantBuy!)}
+        onCancel={() => setShowBuyDialog(false)}
+      >
+        <p>Do you want to buy the NFT for {wantBuy?.display_price} ETH?</p>
+      </Dialog>
     </>
   );
 };
