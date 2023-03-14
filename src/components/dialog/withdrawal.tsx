@@ -8,7 +8,6 @@ import { store } from '@/utils/store';
 import { useCallback, useState } from 'react';
 import type { WithdrawalStatusResponse } from '@reddio.com/js';
 import { getEthAddress } from '@/utils/util';
-import { ERC20Address, ERC721Address } from '@/utils/common';
 
 interface IWithdrawalProps {
   onClose: () => void;

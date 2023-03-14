@@ -2,16 +2,20 @@ import { Button } from 'tdesign-react';
 import Text from '../typography';
 import styles from './index.less';
 import { useCallback, useState } from 'react';
-import { ethers } from 'ethers';
-import { initReddio, reddio, isVercel } from '@/utils/config';
+import { watchAccount } from '@wagmi/core'
+import { reddio } from '@/utils/config';
 import { Loading } from 'tdesign-react';
+import {
+  useConnectModal,
+  useAccountModal,
+  useChainModal,
+} from '@rainbow-me/rainbowkit';
 import { CheckCircleFilledIcon } from 'tdesign-icons-react';
-import { initProviderAndSigner } from '@/utils/util';
 import { addStarkKey } from '@/utils/store';
 
 const steps = [
-  'Switch network to goerli',
-  'Connect to metamask account',
+  'Switch network',
+  'Connect to wallet',
   'Get stark key',
 ];
 
@@ -23,20 +27,25 @@ const ConnectDialog = ({ onSuccess }: ConnectDialogProps) => {
   const [stepIndex, setStepIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const { openConnectModal } = useConnectModal();
+  const { openAccountModal } = useAccountModal();
+  const { openChainModal } = useChainModal();
+
   const changeNetwork = useCallback(async () => {
     setLoading(true);
-    const { provider } = await initProviderAndSigner();
-    await provider.send('wallet_switchEthereumChain', [
-      { chainId: ethers.utils.hexValue(isVercel ? 1 : 5) },
-    ]);
+    openConnectModal?.()
+    openChainModal?.()
     setStepIndex(1);
-    await provider.send('eth_requestAccounts', []);
+    openAccountModal?.()
     setStepIndex(2);
-    initReddio();
-    const { publicKey } = await reddio.keypair.generateFromEthSignature();
-    addStarkKey(publicKey);
-    window.localStorage.setItem('isFirst', '1');
-    onSuccess();
+    watchAccount(async account => {
+      if (account.address) {
+        const { publicKey } = await reddio.keypair.generateFromEthSignature();
+        addStarkKey(publicKey);
+        window.localStorage.setItem('isFirst', '1');
+        onSuccess();
+      }
+    })
   }, []);
 
   return (

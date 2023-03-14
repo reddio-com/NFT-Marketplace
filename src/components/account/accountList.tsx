@@ -2,7 +2,6 @@ import {
   Button,
   Divider,
   message,
-  NotificationPlugin,
   Tooltip,
   Space,
 } from 'tdesign-react';
@@ -17,8 +16,7 @@ import Text from '../typography';
 import Back from '../back';
 import styles from './index.less';
 import { useCallback, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
-import { initProviderAndSigner, getContractBalance } from '@/utils/util';
+import { getContractBalance, getEthAddress } from '@/utils/util';
 import { getErc721Balance } from '@/utils/listERC721';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -30,6 +28,7 @@ import Operate from '@/components/dialog/operate';
 import ERC721MDialog from '@/components/dialog/erc721m';
 import { ERC20Address, ERC721Address } from '@/utils/common';
 import type { BalancesV2Response } from '@reddio.com/js';
+import { fetchBalance } from '@wagmi/core';
 
 const l1Items = ['GoerliETH', 'ERC20', 'ERC721'];
 
@@ -101,12 +100,12 @@ const AccountList = () => {
     return () => {
       timer && window.clearInterval(timer);
     };
-  }, []);
+  }, [snap.starkKey]);
 
   const getL1Balances = useCallback(async () => {
     try {
-      const { signer } = await initProviderAndSigner();
-      const address = await signer.getAddress();
+      const address = await getEthAddress()
+      if (!address) return
       setAddress(address);
       const [eth, erc20, erc721] = await Promise.all([
         getL1Eth(address),
@@ -129,9 +128,8 @@ const AccountList = () => {
   }, []);
 
   const getL1Eth = useCallback(async (address: string) => {
-    const { provider } = await initProviderAndSigner();
-    const balance = await provider.getBalance(address);
-    return Number(ethers.utils.formatEther(balance)).toFixed(4);
+    const balance = await fetchBalance({ address: address as `0x$` });
+    return Number(balance.formatted).toFixed(4);
   }, []);
 
   const getErc20Balance = useCallback(async () => {
