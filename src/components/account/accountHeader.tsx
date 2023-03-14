@@ -7,6 +7,7 @@ import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
 import Record from '@/components/dialog/record';
 import Withdrawal from '@/components/dialog/withdrawal';
+import { watchAccount } from '@wagmi/core';
 
 interface AccountHeaderProps {
   showAlert: boolean;
@@ -20,18 +21,15 @@ const AccountHeader = (props: AccountHeaderProps) => {
 
   const { showAlert } = props;
 
-  const getAddress = useCallback(async () => {
-    const address = await getEthAddress();
-    address && setAddress(address)
-  }, []);
-
   const handlePushClick = useCallback((path: string) => {
     if (history.location.pathname.includes(path)) return;
     history.push(path);
   }, []);
 
   useEffect(() => {
-    getAddress();
+    watchAccount(account => {
+      setAddress(account.address as any)
+    })
   }, []);
 
   return (
