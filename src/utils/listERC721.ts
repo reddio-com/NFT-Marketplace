@@ -1,14 +1,12 @@
 import { ethers } from 'ethers';
-import { initProviderAndSigner } from '@/utils/util';
+import { fetchSigner } from '@wagmi/core';
 import erc721Abi from '../abi/Erc721.abi.json';
 
 const getErc721Balance = async (contractAddress: string): Promise<any[]> => {
   try {
-    const { provider, signer } = await initProviderAndSigner();
-    const code = await provider.getCode(contractAddress);
-    if (code) {
+      const signer: any = await fetchSigner();
       const contract = new ethers.Contract(contractAddress, erc721Abi, signer);
-      const address = await signer.getAddress();
+      const address = await signer.getAddress(); 
       const sentLogs = await contract.queryFilter(
         contract.filters.Transfer(address, null),
       );
@@ -40,8 +38,6 @@ const getErc721Balance = async (contractAddress: string): Promise<any[]> => {
         }
       }
       return Array.from(owned);
-    }
-    return [];
   } catch (e) {
     console.log(e);
     return [];
