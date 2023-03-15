@@ -18,12 +18,18 @@ import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { goerli, mainnet } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { watchAccount } from '@wagmi/core';
+import { watchAccount, watchNetwork } from '@wagmi/core';
 import { isVercel } from '@/utils/config';
 
 const { chains, provider } = configureChains(
   [isVercel ? mainnet : goerli],
-  [alchemyProvider({ apiKey:  isVercel ? 'rLJsa2qBOoeS497vaqqXv9besBxlGK3L' : '3En6dktpG2M1HPNQdoac0PERTR-MFaTW' })],
+  [
+    alchemyProvider({
+      apiKey: isVercel
+        ? 'rLJsa2qBOoeS497vaqqXv9besBxlGK3L'
+        : '3En6dktpG2M1HPNQdoac0PERTR-MFaTW',
+    }),
+  ],
 );
 
 const { connectors } = getDefaultWallets({
@@ -92,6 +98,12 @@ export default function Layout() {
         !isFirst && init();
       } else {
         addStarkKey('');
+      }
+    });
+    watchNetwork((network) => {
+      const chainId = isVercel ? mainnet.id : goerli.id;
+      if (network.chain?.id === chainId) {
+        !isFirst && init();
       }
     });
   }, []);
