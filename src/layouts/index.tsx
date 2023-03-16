@@ -18,7 +18,7 @@ import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { goerli, mainnet } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { watchAccount, watchNetwork } from '@wagmi/core';
+import { watchAccount, watchNetwork, getNetwork } from '@wagmi/core';
 import { isVercel } from '@/utils/config';
 
 const { chains, provider } = configureChains(
@@ -87,22 +87,31 @@ export default function Layout() {
 
   useEffect(() => {
     initReddio(wagmiClient);
+    let i = 0;
     const init = async () => {
+      if (i > 1) {
+        return;
+      }
       const { publicKey, privateKey } =
         await reddio.keypair.generateFromEthSignature();
       console.log(publicKey, privateKey);
       addStarkKey(publicKey);
     };
-    watchAccount((account) => {
-      if (account.address) {
-        !isFirst && init();
+    watchAccount(async (account) => {
+      const chainId = isVercel ? mainnet.id : goerli.id;
+      if (account.address && getNetwork().chain?.id === chainId) {
+        i++;
+        !isFirst && (await init());
+        i--;
       } else {
         addStarkKey('');
+        i--;
       }
     });
     watchNetwork((network) => {
       const chainId = isVercel ? mainnet.id : goerli.id;
       if (network.chain?.id === chainId) {
+        i++;
         !isFirst && init();
       }
     });
