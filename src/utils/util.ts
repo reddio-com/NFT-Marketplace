@@ -1,14 +1,17 @@
-import { getAccount, readContract, fetchBalance } from '@wagmi/core'
+import { getAccount, readContract, fetchBalance } from '@wagmi/core';
 import erc721Abi from '@/abi/Erc721.abi.json';
 import { ERC721Address } from '@/utils/common';
 
 const getEthAddress = async () => {
-  return getAccount().address
+  return getAccount().address as string;
 };
 
 const getContractBalance = async (contractAddress: string) => {
-  const balance = await fetchBalance({ address: (await getEthAddress())!, token: contractAddress as `0x` })
-  return balance.formatted
+  const balance = await fetchBalance({
+    address: (await getEthAddress())!,
+    token: contractAddress as `0x`,
+  });
+  return balance.formatted;
 };
 
 const getTokenURI = async (tokenId: number) => {
@@ -17,11 +20,7 @@ const getTokenURI = async (tokenId: number) => {
     abi: erc721Abi,
     functionName: 'tokenURI',
     args: [tokenId],
-  })
+  });
 };
 
-export {
-  getEthAddress,
-  getContractBalance,
-  getTokenURI,
-};
+export { getEthAddress, getContractBalance, getTokenURI };

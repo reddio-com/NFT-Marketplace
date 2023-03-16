@@ -19,6 +19,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
   const snap = useSnapshot(store);
 
   const [status, setStatus] = useState<WithdrawalStatusResponse[]>([]);
+  const [isLoading, setIsLoading] = useState({});
 
   const withdrawalStatusQuery = useQuery(
     ['withdrawalStatus', snap.starkKey],
@@ -61,6 +62,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
           tokenAddress: item.contract_address,
         });
       }
+      setIsLoading((value) => ({ ...value, [item.contract_address]: true }));
       await reddio.apis.withdrawalFromL1({
         ethAddress: await getEthAddress(),
         type: item.type,
@@ -99,7 +101,11 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
             return (
               <div key={index}>
                 <Text color="#2C2C2C">{getText(item)}</Text>
-                <Button shape="round" onClick={() => handleWithdrawal(item)}>
+                <Button
+                  shape="round"
+                  onClick={() => handleWithdrawal(item)}
+                  loading={isLoading[item.contract_address]}
+                >
                   Withdrawal
                 </Button>
               </div>
