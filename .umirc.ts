@@ -4,6 +4,7 @@ export default {
   hash: true,
   define: {
     'process.env.IS_VERCEL': process.env.IS_VERCEL,
+    'process.env.API_ENV': process.env.API_ENV,
   },
   scripts: [
     {
@@ -11,5 +12,5 @@ export default {
       async: true,
     },
   ],
-  title: 'Reddio Demos'
+  title: 'Reddio Demos',
 };

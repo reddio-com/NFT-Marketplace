@@ -6,7 +6,7 @@ let reddio: Reddio;
 const initReddio = (client: any) => {
   if (typeof window !== 'undefined' && !reddio) {
     reddio = new Reddio({
-      env: isVercel ? 'main' : 'test',
+      env: isVercel ? 'main' : process.env.API_ENV === 'mini' ? 'mini' : 'test',
       wagmiClient: client,
     });
   }

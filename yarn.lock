@@ -1801,10 +1801,10 @@
     qrcode "1.5.0"
     react-remove-scroll "2.5.4"
 
-"@reddio.com/js@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@reddio.com/js/-/js-0.5.0.tgz#c4c457d7887a3042490c64c67241236347072195"
-  integrity sha512-o71QVsMxz2crEW+8vcwXUdlUUsdRoiFVkZN4Gb1IzIG+tEI0FfCZfRg+PhL5jC9QEfq4sdxih6mK1C2rC+/yNA==
+"@reddio.com/js@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@reddio.com/js/-/js-0.5.1.tgz#146eb95522c4c7e5c0e6ba9ed39fa74361db04de"
+  integrity sha512-WWdICwA7/78fxPP4uXismBUZHDFb22D2t3thbyqdQHQlr9+9PkVOoy61xxPdOUYI/1LevHlVHoRxRKYruMybeA==
   dependencies:
     "@starkware-industries/starkware-crypto-utils" "^0.0.2"
     assert "^2.0.0"
