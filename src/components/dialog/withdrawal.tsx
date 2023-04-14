@@ -94,7 +94,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
     >
       <div className={styles.withdrawalDialogContent}>
         <div>
-          <Text type="bold">withdrawal area</Text>
+          <Text type="bold">Withdraw area</Text>
         </div>
         <div>
           {status.map((item, index) => {
@@ -106,7 +106,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
                   onClick={() => handleWithdrawal(item)}
                   loading={isLoading[item.contract_address]}
                 >
-                  Withdrawal
+                  Withdraw
                 </Button>
               </div>
             );

@@ -27,9 +27,9 @@ const AccountHeader = (props: AccountHeaderProps) => {
   }, []);
 
   useEffect(() => {
-    watchAccount(account => {
-      setAddress(account.address as any)
-    })
+    watchAccount((account) => {
+      setAddress(account.address as any);
+    });
   }, []);
 
   return (
@@ -58,7 +58,7 @@ const AccountHeader = (props: AccountHeaderProps) => {
             disabled={!snap.starkKey}
             onClick={() => setShowWithdrawal(true)}
           >
-            Withdrawal Area
+            Withdraw Area
           </Button>
           <Button
             theme="primary"

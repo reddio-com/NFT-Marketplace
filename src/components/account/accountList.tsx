@@ -1,10 +1,4 @@
-import {
-  Button,
-  Divider,
-  message,
-  Tooltip,
-  Space,
-} from 'tdesign-react';
+import { Button, Divider, message, Tooltip, Space } from 'tdesign-react';
 import {
   ChevronRightIcon,
   GiftIcon,
@@ -104,8 +98,8 @@ const AccountList = () => {
 
   const getL1Balances = useCallback(async () => {
     try {
-      const address = await getEthAddress()
-      if (!address) return
+      const address = await getEthAddress();
+      if (!address) return;
       setAddress(address);
       const [eth, erc20, erc721] = await Promise.all([
         getL1Eth(address),
@@ -299,7 +293,7 @@ const AccountList = () => {
                 icon={<LogoutIcon />}
                 onClick={() => handleOperate('Withdrawal')}
               >
-                Withdrawal
+                Withdraw
               </Button>
             </Tooltip>
           </Space>

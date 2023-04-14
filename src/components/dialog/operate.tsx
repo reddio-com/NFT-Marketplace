@@ -396,7 +396,7 @@ const Operate = (props: IOperateProps) => {
           <div className={styles.infoWrapper}>
             <InfoCircleFilledIcon />
             <Text>
-              Wait approximately 4 ~ 8 hours for funds move to the withdrawal
+              Wait approximately 4 ~ 8 hours for funds move to the Withdraw
               area.
             </Text>
           </div>
