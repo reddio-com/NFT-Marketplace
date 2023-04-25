@@ -168,7 +168,7 @@ const Operate = (props: IOperateProps) => {
         });
       }
       showNotification(
-        'Approve success，wait a moment before making a deposit',
+        'Approve success, wait a moment before making a deposit',
       );
       await tx.wait();
       setNeedApprove(false);
