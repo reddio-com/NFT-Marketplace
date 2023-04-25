@@ -69,30 +69,6 @@ const Operate = (props: IOperateProps) => {
     [balance],
   );
 
-  const rules = useMemo<any>(() => {
-    return {
-      type: [{ required: true, message: 'Type is required', type: 'error' }],
-      address: [
-        { required: true, message: 'Address is required', type: 'error' },
-      ],
-      tokenId: [
-        {
-          required: form.getFieldValue?.('type') === 'ERC721',
-          message: 'Token ID is required',
-          type: 'error',
-        },
-      ],
-      amount: [
-        {
-          required: form.getFieldValue?.('type') !== 'ERC721',
-          message: 'Amount is required',
-          type: 'error',
-        },
-        { validator: balanceValidator },
-      ],
-    };
-  }, [balanceValidator]);
-
   const buttonText = useMemo(() => {
     if (type === 'Deposit') {
       return needApprove ? 'Approve' : type;
@@ -136,6 +112,31 @@ const Operate = (props: IOperateProps) => {
     const item = l2Balance.find((item) => item.contract_address === selectType);
     return item && (item.type === 'ERC721' || item.type === 'ERC721M');
   }, [selectType, l2Balance, type]);
+
+  const rules = useMemo<any>(() => {
+    console.log(form.getFieldValue?.('type'))
+    return {
+      type: [{ required: true, message: 'Type is required', type: 'error' }],
+      address: [
+        { required: true, message: 'Address is required', type: 'error' },
+      ],
+      tokenId: [
+        {
+          required: isERC721,
+          message: 'Token ID is required',
+          type: 'error',
+        },
+      ],
+      amount: [
+        {
+          required: !isERC721,
+          message: 'Amount is required',
+          type: 'error',
+        },
+        { validator: balanceValidator },
+      ],
+    };
+  }, [balanceValidator, form.getFieldValue?.('type'), isERC721]);
 
   const showNotification = useCallback((content: string) => {
     const notification = NotificationPlugin.success({

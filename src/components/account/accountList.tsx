@@ -291,7 +291,7 @@ const AccountList = () => {
                 shape="round"
                 disabled={loading.l2}
                 icon={<LogoutIcon />}
-                onClick={() => handleOperate('Withdrawal')}
+                onClick={() => handleOperate('Withdraw')}
               >
                 Withdraw
               </Button>
