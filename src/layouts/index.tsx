@@ -20,6 +20,8 @@ import { goerli, mainnet } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { watchAccount, watchNetwork, getNetwork } from '@wagmi/core';
 import { isVercel } from '@/utils/config';
+import { ConfigProvider } from 'tdesign-react';
+import enConfig from 'tdesign-react/es/locale/en_US';
 
 const { chains, provider } = configureChains(
   [isVercel ? mainnet : goerli],
@@ -121,51 +123,53 @@ export default function Layout() {
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains}>
         <QueryClientProvider client={queryClient}>
-          <div className={styles.layout}>
-            <header>
-              <img src={require('@/assets/logo.png')} alt="" height={24} />
-              <ConnectButton accountStatus="address" />
-            </header>
-            <div className={styles.container}>
-              {isFirst ? (
-                <ConnectDialog onSuccess={handleSuccess} />
-              ) : (
-                <>
-                  <div className={styles.contentWrapper}>
-                    <AccountHeader showAlert={openAlert} />
-                    {openAlert && (
-                      <Alert
-                        severity="info"
-                        onClose={() => setOpenAlert(false)}
-                      >
-                        Your transaction is going to be submitted to Layer2 and
-                        will be proved on L1
-                      </Alert>
-                    )}
-                    <Outlet />
-                  </div>
-                </>
-              )}
+          <ConfigProvider globalConfig={enConfig}>
+            <div className={styles.layout}>
+              <header>
+                <img src={require('@/assets/logo.png')} alt="" height={24} />
+                <ConnectButton accountStatus="address" />
+              </header>
+              <div className={styles.container}>
+                {isFirst ? (
+                  <ConnectDialog onSuccess={handleSuccess} />
+                ) : (
+                  <>
+                    <div className={styles.contentWrapper}>
+                      <AccountHeader showAlert={openAlert} />
+                      {openAlert && (
+                        <Alert
+                          severity="info"
+                          onClose={() => setOpenAlert(false)}
+                        >
+                          Your transaction is going to be submitted to Layer2
+                          and will be proved on L1
+                        </Alert>
+                      )}
+                      <Outlet />
+                    </div>
+                  </>
+                )}
+              </div>
+              <footer className={styles.footer}>
+                <div>
+                  {footerIconLinks.map((icon, index) => {
+                    return (
+                      <img
+                        key={index}
+                        src={icon.img}
+                        className={styles.icon}
+                        onClick={() => window.open(icon.href, '__blank')}
+                      />
+                    );
+                  })}
+                </div>
+                <div className={styles.footerInfo}>
+                  Copyright © {new Date().getFullYear()} Reddio. All rights
+                  reserved.
+                </div>
+              </footer>
             </div>
-            <footer className={styles.footer}>
-              <div>
-                {footerIconLinks.map((icon, index) => {
-                  return (
-                    <img
-                      key={index}
-                      src={icon.img}
-                      className={styles.icon}
-                      onClick={() => window.open(icon.href, '__blank')}
-                    />
-                  );
-                })}
-              </div>
-              <div className={styles.footerInfo}>
-                Copyright © {new Date().getFullYear()} Reddio. All rights
-                reserved.
-              </div>
-            </footer>
-          </div>
+          </ConfigProvider>
         </QueryClientProvider>
       </RainbowKitProvider>
     </WagmiConfig>
