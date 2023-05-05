@@ -1,8 +1,8 @@
 import { Button } from 'tdesign-react';
 import Text from '../typography';
 import styles from './index.less';
-import { useCallback, useState } from 'react';
-import { watchAccount } from '@wagmi/core'
+import { useCallback, useEffect, useState } from 'react';
+import { watchAccount } from '@wagmi/core';
 import { reddio } from '@/utils/config';
 import { Loading } from 'tdesign-react';
 import {
@@ -13,11 +13,7 @@ import {
 import { CheckCircleFilledIcon } from 'tdesign-icons-react';
 import { addStarkKey } from '@/utils/store';
 
-const steps = [
-  'Switch network',
-  'Connect to wallet',
-  'Get stark key',
-];
+const steps = ['Switch network', 'Connect to wallet', 'Get stark key'];
 
 interface ConnectDialogProps {
   onSuccess: () => void;
@@ -29,23 +25,21 @@ const ConnectDialog = ({ onSuccess }: ConnectDialogProps) => {
 
   const { openConnectModal } = useConnectModal();
   const { openAccountModal } = useAccountModal();
-  const { openChainModal } = useChainModal();
 
   const changeNetwork = useCallback(async () => {
-    setLoading(true);
-    openConnectModal?.()
-    openChainModal?.()
-    setStepIndex(1);
-    openAccountModal?.()
+    openConnectModal?.();
     setStepIndex(2);
-    watchAccount(async account => {
+  }, []);
+
+  useEffect(() => {
+    watchAccount(async (account) => {
       if (account.address) {
         const { publicKey } = await reddio.keypair.generateFromEthSignature();
         addStarkKey(publicKey);
         window.localStorage.setItem('isFirst', '1');
         onSuccess();
       }
-    })
+    });
   }, []);
 
   return (
