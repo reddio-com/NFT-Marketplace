@@ -290,8 +290,7 @@ const Operate = (props: IOperateProps) => {
   );
 
   const submit = useCallback(async () => {
-    const error = await form.validate?.();
-    if (error && Object.keys(error).length) return;
+    await form.validate?.();
     const assetType = l2Balance.find(
       (item) => item.contract_address === selectType,
     )?.type;
@@ -308,7 +307,7 @@ const Operate = (props: IOperateProps) => {
         transfer(assetType);
         return;
       }
-      case 'Withdrawal': {
+      case 'Withdraw': {
         withdrawal(assetType);
         return;
       }
