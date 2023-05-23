@@ -114,7 +114,6 @@ const Operate = (props: IOperateProps) => {
   }, [selectType, l2Balance, type]);
 
   const rules = useMemo<any>(() => {
-    console.log(form.getFieldValue?.('type'))
     return {
       type: [{ required: true, message: 'Type is required', type: 'error' }],
       address: [
@@ -219,7 +218,6 @@ const Operate = (props: IOperateProps) => {
   const transfer = useCallback(
     async (type: any) => {
       try {
-        console.log(type, '=======');
         setLoading(true);
         const { starkKey } = store;
         const amount = form.getFieldValue?.('amount');
@@ -361,13 +359,13 @@ const Operate = (props: IOperateProps) => {
           <FormItem
             initialData={
               type !== 'Transfer'
-                ? type === 'Withdrawal'
+                ? type === 'Withdraw'
                   ? ethAddress
                   : store.starkKey
                 : '0x4c2d19ac0a343218cebcea5ab124440a0650744c081247b8e4146877d2a5cad'
             }
             label={
-              type === 'Withdrawal' ? 'To ETH Address' : 'To Starkex Address'
+              type === 'Withdraw' ? 'To ETH Address' : 'To Starkex Address'
             }
             name="address"
           >
@@ -392,7 +390,7 @@ const Operate = (props: IOperateProps) => {
             {buttonText}
           </Button>
         </div>
-        {type === 'Withdrawal' ? (
+        {type === 'Withdraw' ? (
           <div className={styles.infoWrapper}>
             <InfoCircleFilledIcon />
             <Text>
