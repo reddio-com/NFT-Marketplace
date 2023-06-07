@@ -84,7 +84,8 @@ const Operate = (props: IOperateProps) => {
       }));
     }
     const item = l2Balance.find((item) => item.contract_address === selectType);
-    if (item && (item.type === 'ERC721' || item.type === 'ERC721M')) {
+    if (item && item.type.includes('ERC721')) {
+      // @ts-ignore
       return item.available_token_ids.map((id) => ({ label: id, value: id }));
     }
     return [];
@@ -110,7 +111,12 @@ const Operate = (props: IOperateProps) => {
       return form.getFieldValue?.('type') === 'ERC721';
     }
     const item = l2Balance.find((item) => item.contract_address === selectType);
-    return item && (item.type === 'ERC721' || item.type === 'ERC721M');
+    return item && item.type.includes('ERC721');
+  }, [selectType, l2Balance, type]);
+
+  const isERC721MC = useMemo(() => {
+    const item = l2Balance.find((item) => item.contract_address === selectType);
+    return item && item.type === 'ERC721MC';
   }, [selectType, l2Balance, type]);
 
   const rules = useMemo<any>(() => {
@@ -134,8 +140,15 @@ const Operate = (props: IOperateProps) => {
         },
         { validator: balanceValidator },
       ],
+      url: [
+        {
+          required: isERC721MC,
+          message: 'Token url is required',
+          type: 'error',
+        },
+      ],
     };
-  }, [balanceValidator, form.getFieldValue?.('type'), isERC721]);
+  }, [balanceValidator, form.getFieldValue?.('type'), isERC721, isERC721MC]);
 
   const showNotification = useCallback((content: string) => {
     const notification = NotificationPlugin.success({
@@ -223,6 +236,7 @@ const Operate = (props: IOperateProps) => {
         const amount = form.getFieldValue?.('amount');
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
+        const url = form.getFieldValue?.('url');
         const { privateKey } = await reddio.keypair.generateFromEthSignature();
         const params: SignTransferParams = {
           starkKey,
@@ -237,6 +251,9 @@ const Operate = (props: IOperateProps) => {
         if (type === 'ERC721' || type === 'ERC721M') {
           params.contractAddress = selectType;
           params.tokenId = tokenId;
+        }
+        if (type === 'ERC721MC') {
+          params.tokenUrl = url;
         }
         await reddio.apis.transfer(params);
         showNotification('Transfer is successful, please wait for the arrival');
@@ -258,6 +275,7 @@ const Operate = (props: IOperateProps) => {
         const amount = form.getFieldValue?.('amount');
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
+        const url = form.getFieldValue?.('url');
         const { privateKey } = await reddio.keypair.generateFromEthSignature();
         const params: SignTransferParams = {
           starkKey,
@@ -269,10 +287,14 @@ const Operate = (props: IOperateProps) => {
         if (type === 'ERC20') {
           params.contractAddress = selectType;
         }
-        if (type === 'ERC721' || type === 'ERC721M') {
+        if (type.includes('ERC721')) {
           params.contractAddress = selectType;
           params.tokenId = tokenId;
         }
+        if (type === 'ERC721MC') {
+          params.tokenUrl = url;
+        }
+        console.log(params);
         await reddio.apis.withdrawalFromL2(params);
         showNotification(
           'WithdrawalFromL2 is successful, please wait for the arrival',
@@ -380,6 +402,11 @@ const Operate = (props: IOperateProps) => {
               <Input size="medium" status="default" type="number" />
             </FormItem>
           )}
+          {isERC721MC ? (
+            <FormItem label="Token Url" name="url">
+              <Input size="medium" status="default" />
+            </FormItem>
+          ) : null}
         </Form>
         {!isERC721 ? <Text>Balance: {balance}</Text> : null}
         <div className={styles.buttonWrapper}>

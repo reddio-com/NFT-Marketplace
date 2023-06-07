@@ -69,14 +69,7 @@ const AccountList = () => {
     {
       onSuccess: ({ data }) => {
         if (data.status === 'FAILED') return;
-        const res = data.data.filter((item) => {
-          if (item.type === 'ETH' || item.type === 'ERC20') {
-            return true;
-          }
-          // @ts-ignore
-          return item.base_uri !== '';
-        });
-        setL2Balance(res);
+        setL2Balance(data.data);
         setLoading((v) => ({
           ...v,
           l2: false,
