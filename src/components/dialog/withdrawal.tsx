@@ -37,8 +37,8 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
   );
 
   const getText = useCallback((item: WithdrawalStatusResponse) => {
-    if (item.type === 'ERC721' || item.type === 'ERC721M') {
-      return `${item.symbol} - TokenId: ${item.token_id}`;
+    if (item.type.includes('ERC721')) {
+      return `${item.symbol} - ${item.type} - TokenId: ${item.token_id}`;
     }
     return `${item.display_value} ${item.type}`;
   }, []);
@@ -51,6 +51,8 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
         type: item.type,
         tokenId: Number(item.token_id),
         assetType: item.asset_type,
+        // @ts-ignore
+        tokenUrl: item.token_url,
       });
       withdrawalStatusQuery.refetch();
       message.success('Withdrawal success');
