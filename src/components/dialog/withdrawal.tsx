@@ -45,23 +45,6 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
 
   const handleWithdrawal = useCallback(
     async (item: WithdrawalStatusResponse) => {
-      const params: any = {
-        ethAddress: await getEthAddress(),
-        type: item.type,
-      };
-      if (item.type === 'ERC721' || item.type === 'ERC721M') {
-        params.assetType = await reddio.utils.getAssetTypeAndId({
-          type: item.type,
-          tokenAddress: item.contract_address,
-          tokenId: Number(item.token_id),
-        });
-        params.tokenId = Number(item.token_id);
-      } else {
-        params.assetType = await reddio.utils.getAssetTypeAndId({
-          type: item.type,
-          tokenAddress: item.contract_address,
-        });
-      }
       setIsLoading((value) => ({ ...value, [item.contract_address]: true }));
       await reddio.apis.withdrawalFromL1({
         ethAddress: await getEthAddress(),

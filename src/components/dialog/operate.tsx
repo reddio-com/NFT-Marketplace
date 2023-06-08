@@ -294,7 +294,6 @@ const Operate = (props: IOperateProps) => {
         if (type === 'ERC721MC') {
           params.tokenUrl = url;
         }
-        console.log(params);
         await reddio.apis.withdrawalFromL2(params);
         showNotification(
           'WithdrawalFromL2 is successful, please wait for the arrival',
