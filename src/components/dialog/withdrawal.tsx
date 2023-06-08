@@ -52,7 +52,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
         tokenId: Number(item.token_id),
         assetType: item.asset_type,
         // @ts-ignore
-        tokenUrl: item.token_url,
+        tokenUrl: item.token_uri,
       });
       withdrawalStatusQuery.refetch();
       message.success('Withdrawal success');
