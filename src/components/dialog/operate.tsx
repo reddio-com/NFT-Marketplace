@@ -14,6 +14,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { reddio } from '@/utils/config';
 import { ERC20Address, ERC721Address } from '@/utils/common';
 import type { SignTransferParams, BalancesV2Response } from '@reddio.com/js';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 const FormItem = Form.FormItem;
 
@@ -32,6 +34,19 @@ const Operate = (props: IOperateProps) => {
   const [selectType, setSelectType] = useState('GoerliETH');
   const [needApprove, setNeedApprove] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const getBalanceQuery = useQuery(
+    ['getBalancesV3', store.starkKey],
+    () => {
+      return reddio.apis.getBalancesV3({
+        starkKey: store.starkKey,
+        limit: 1000,
+      });
+    },
+    {
+      enabled: type === 'Withdraw',
+    },
+  );
 
   const title = useMemo(() => {
     switch (type) {
@@ -139,13 +154,6 @@ const Operate = (props: IOperateProps) => {
           type: 'error',
         },
         { validator: balanceValidator },
-      ],
-      url: [
-        {
-          required: isERC721MC,
-          message: 'Token url is required',
-          type: 'error',
-        },
       ],
     };
   }, [balanceValidator, form.getFieldValue?.('type'), isERC721, isERC721MC]);
@@ -275,7 +283,19 @@ const Operate = (props: IOperateProps) => {
         const amount = form.getFieldValue?.('amount');
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
-        const url = form.getFieldValue?.('url');
+        let url = '';
+        if (getBalanceQuery.data) {
+          getBalanceQuery.data?.data.data.forEach((item) => {
+            if (item.contract_address === selectType) {
+              const token = item.available_tokens.find(
+                (token) => token.token_id === tokenId.toString(),
+              );
+              if (token) {
+                url = token.token_uri;
+              }
+            }
+          });
+        }
         const { privateKey } = await reddio.keypair.generateFromEthSignature();
         const params: SignTransferParams = {
           starkKey,
@@ -305,7 +325,7 @@ const Operate = (props: IOperateProps) => {
         setLoading(false);
       }
     },
-    [store, form, selectType],
+    [store, form, selectType, getBalanceQuery.data],
   );
 
   const submit = useCallback(async () => {
@@ -401,11 +421,6 @@ const Operate = (props: IOperateProps) => {
               <Input size="medium" status="default" type="number" />
             </FormItem>
           )}
-          {isERC721MC ? (
-            <FormItem label="Token Url" name="url">
-              <Input size="medium" status="default" />
-            </FormItem>
-          ) : null}
         </Form>
         {!isERC721 ? <Text>Balance: {balance}</Text> : null}
         <div className={styles.buttonWrapper}>
