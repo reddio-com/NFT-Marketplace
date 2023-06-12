@@ -19,7 +19,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
   const snap = useSnapshot(store);
 
   const [status, setStatus] = useState<WithdrawalStatusResponse[]>([]);
-  const [isLoading, setIsLoading] = useState({});
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
   const withdrawalStatusQuery = useQuery(
     ['withdrawalStatus', snap.starkKey],
@@ -45,7 +45,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
 
   const handleWithdrawal = useCallback(
     async (item: WithdrawalStatusResponse) => {
-      setIsLoading((value) => ({ ...value, [item.contract_address]: true }));
+      setIsLoading((value) => ({ ...value, [item.asset_id]: true }));
       await reddio.apis.withdrawalFromL1({
         ethAddress: await getEthAddress(),
         type: item.type,
@@ -89,7 +89,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
                 <Button
                   shape="round"
                   onClick={() => handleWithdrawal(item)}
-                  loading={isLoading[item.contract_address]}
+                  loading={isLoading[item.asset_id]}
                 >
                   Withdraw
                 </Button>
