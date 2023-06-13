@@ -46,16 +46,21 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
   const handleWithdrawal = useCallback(
     async (item: WithdrawalStatusResponse) => {
       setIsLoading((value) => ({ ...value, [item.asset_id]: true }));
-      await reddio.apis.withdrawalFromL1({
-        ethAddress: await getEthAddress(),
-        type: item.type,
-        tokenId: Number(item.token_id),
-        assetType: item.asset_type,
-        // @ts-ignore
-        tokenUrl: item.token_uri,
-      });
-      withdrawalStatusQuery.refetch();
-      message.success('Withdrawal success');
+      try {
+        await reddio.apis.withdrawalFromL1({
+          ethAddress: await getEthAddress(),
+          type: item.type,
+          tokenId: Number(item.token_id),
+          assetType: item.asset_type,
+          // @ts-ignore
+          tokenUrl: item.token_uri,
+        });
+        withdrawalStatusQuery.refetch();
+        message.success('Withdrawal success');
+      } catch (e: any) {
+        message.error(e.message);
+        setIsLoading((value) => ({ ...value, [item.asset_id]: false }));
+      }
     },
     [],
   );
