@@ -284,7 +284,7 @@ const Operate = (props: IOperateProps) => {
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
         let url = '';
-        if (getBalanceQuery.data) {
+        if (getBalanceQuery.data && type === 'ERC721MC') {
           getBalanceQuery.data?.data.data.forEach((item) => {
             if (item.contract_address === selectType) {
               const token = item.available_tokens.find(
