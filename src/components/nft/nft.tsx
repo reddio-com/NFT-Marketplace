@@ -31,7 +31,7 @@ const NFT = ({ tokenId, type, baseUri }: INFTPros) => {
           return;
         }
         const { data } = await axios.get(
-          `/api/token?baseUrl=${encodeURIComponent(base)}&tokenId=${Number(
+          `/api/token?baseUrl=${encodeURIComponent(baseUri)}&tokenId=${Number(
             tokenId!,
           )}`,
         );
