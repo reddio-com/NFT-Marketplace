@@ -23,6 +23,13 @@ const NFT = ({ tokenId, type, baseUri }: INFTPros) => {
     if (baseUri) {
       const getCustomData = async () => {
         const base = baseUri.endsWith('/') ? baseUri : baseUri + '/';
+        if (baseUri.includes('reddiousermetadata')) {
+          const { data } = await axios.get(
+            `${baseUri}${tokenId}/metadata.json`,
+          );
+          setImageUrl(data.media);
+          return;
+        }
         const { data } = await axios.get(
           `/api/token?baseUrl=${encodeURIComponent(base)}&tokenId=${Number(
             tokenId!,
