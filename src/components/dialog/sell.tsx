@@ -8,6 +8,7 @@ import { ERC721Address } from '@/utils/common';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
+import { generateKey } from '@/utils/util';
 
 const FormItem = Form.FormItem;
 
@@ -54,7 +55,7 @@ const Sell = (props: IOperateProps) => {
     if (error && Object.keys(error).length) return;
     setLoading(true);
     const type = form.getFieldValue?.('type');
-    const keypair = await reddio.keypair.generateFromEthSignature();
+    const keypair = await generateKey();
     const params = await reddio.utils.getOrderParams({
       keypair,
       amount: '1',

@@ -7,7 +7,6 @@ const initReddio = (client: any) => {
   if (typeof window !== 'undefined' && !reddio) {
     reddio = new Reddio({
       env: isVercel ? 'main' : 'test',
-      wagmiClient: client,
     });
   }
 };

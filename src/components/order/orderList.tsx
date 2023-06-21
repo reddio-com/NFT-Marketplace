@@ -11,6 +11,7 @@ import axios from 'axios';
 import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
 import SellDialog from '../dialog/sell';
+import { generateKey } from '@/utils/util';
 
 const OrderList = () => {
   const snap = useSnapshot(store);
@@ -97,7 +98,7 @@ const OrderList = () => {
         );
         return;
       }
-      const keypair = await reddio.keypair.generateFromEthSignature();
+      const keypair = await generateKey();
       const params = await reddio.utils.getOrderParams({
         keypair,
         amount: order.amount,

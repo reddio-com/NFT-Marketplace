@@ -16,6 +16,7 @@ import { ERC20Address, ERC721Address } from '@/utils/common';
 import type { SignTransferParams, BalancesV2Response } from '@reddio.com/js';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { generateKey } from '@/utils/util';
 
 const FormItem = Form.FormItem;
 
@@ -245,7 +246,7 @@ const Operate = (props: IOperateProps) => {
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
         const url = form.getFieldValue?.('url');
-        const { privateKey } = await reddio.keypair.generateFromEthSignature();
+        const { privateKey } = await generateKey();
         const params: SignTransferParams = {
           starkKey,
           privateKey,
@@ -296,7 +297,7 @@ const Operate = (props: IOperateProps) => {
             }
           });
         }
-        const { privateKey } = await reddio.keypair.generateFromEthSignature();
+        const { privateKey } = await generateKey();
         const params: SignTransferParams = {
           starkKey,
           privateKey,

@@ -12,6 +12,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { CheckCircleFilledIcon } from 'tdesign-icons-react';
 import { addStarkKey } from '@/utils/store';
+import { generateKey } from '@/utils/util';
 
 const steps = ['Switch network', 'Connect to wallet', 'Get stark key'];
 
@@ -34,7 +35,7 @@ const ConnectDialog = ({ onSuccess }: ConnectDialogProps) => {
   useEffect(() => {
     watchAccount(async (account) => {
       if (account.address) {
-        const { publicKey } = await reddio.keypair.generateFromEthSignature();
+        const { publicKey } = await generateKey();
         addStarkKey(publicKey);
         window.localStorage.setItem('isFirst', '1');
         onSuccess();

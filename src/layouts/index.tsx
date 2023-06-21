@@ -9,12 +9,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initReddio, reddio } from '@/utils/config';
 import { addStarkKey } from '@/utils/store';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton, connectorsForWallets } from '@rainbow-me/rainbowkit';
 
 import Alert from '@mui/material/Alert';
 import '@rainbow-me/rainbowkit/styles.css';
 
-import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { goerli, mainnet } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
@@ -22,6 +22,13 @@ import { watchAccount, watchNetwork, getNetwork } from '@wagmi/core';
 import { isVercel } from '@/utils/config';
 import { ConfigProvider } from 'tdesign-react';
 import enConfig from 'tdesign-react/es/locale/en_US';
+import {
+  metaMaskWallet,
+  rainbowWallet,
+  walletConnectWallet,
+} from '@rainbow-me/rainbowkit/wallets';
+import { particleWallet } from '@particle-network/rainbowkit-ext';
+import { generateKey } from '@/utils/util';
 
 const { chains, provider } = configureChains(
   [isVercel ? mainnet : goerli],
@@ -34,13 +41,28 @@ const { chains, provider } = configureChains(
   ],
 );
 
-const { connectors } = getDefaultWallets({
-  appName: 'Reddio Demo',
-  chains,
-});
+const connectors = connectorsForWallets([
+  {
+    groupName: 'Web2 ways',
+    wallets: [
+      particleWallet({ chains, authType: 'google' }),
+      particleWallet({ chains, authType: 'facebook' }),
+      particleWallet({ chains, authType: 'apple' }),
+      particleWallet({ chains }),
+    ],
+  },
+  {
+    groupName: 'Web3 ways',
+    wallets: [
+      rainbowWallet({ chains }),
+      walletConnectWallet({ chains }),
+      metaMaskWallet({ chains }),
+    ],
+  },
+]);
 
 const wagmiClient = createClient({
-  autoConnect: true,
+  autoConnect: false,
   connectors,
   provider,
 });
@@ -94,8 +116,9 @@ export default function Layout() {
       if (i > 1) {
         return;
       }
-      const { publicKey, privateKey } =
-        await reddio.keypair.generateFromEthSignature();
+      const result = particle.auth.isLogin();
+      console.log(result, 12312312312);
+      const { publicKey, privateKey } = await generateKey();
       console.log(publicKey, privateKey);
       addStarkKey(publicKey);
     };
