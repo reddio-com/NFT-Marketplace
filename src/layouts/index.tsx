@@ -28,7 +28,7 @@ import {
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 import { particleWallet } from '@particle-network/rainbowkit-ext';
-import { generateKey } from '@/utils/util';
+import { generateKey, particle } from '@/utils/util';
 
 const { chains, provider } = configureChains(
   [isVercel ? mainnet : goerli],
@@ -110,14 +110,15 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
+    if (particle.auth.isLogin()) {
+      particle.auth.logout();
+    }
     initReddio(wagmiClient);
     let i = 0;
     const init = async () => {
       if (i > 1) {
         return;
       }
-      const result = particle.auth.isLogin();
-      console.log(result, 12312312312);
       const { publicKey, privateKey } = await generateKey();
       console.log(publicKey, privateKey);
       addStarkKey(publicKey);

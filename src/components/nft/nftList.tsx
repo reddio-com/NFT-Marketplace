@@ -46,7 +46,7 @@ const NFTList = () => {
       onSuccess: async ({ data }) => {
         if (data.status === 'FAILED') return;
         let ids: any[] = [];
-        ids = data.data[0].available_tokens.map((item) => item.token_id);
+        ids = data?.data[0]?.available_tokens.map((item) => item.token_id);
         // @ts-ignore
         if (ids.length) setBaseUri(data.data[0].base_uri);
         if (!ids.length) return;

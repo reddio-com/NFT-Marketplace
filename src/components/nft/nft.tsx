@@ -27,7 +27,7 @@ const NFT = ({ tokenId, type, baseUri }: INFTPros) => {
           const { data } = await axios.get(
             `${baseUri}${tokenId}/metadata.json`,
           );
-          setImageUrl(data.media);
+          setImageUrl(data.image);
           return;
         }
         const { data } = await axios.get(
