@@ -116,7 +116,7 @@ export default function Layout() {
     initReddio(wagmiClient);
     let i = 0;
     const init = async () => {
-      if (i > 1) {
+      if (i > 0) {
         return;
       }
       const { publicKey, privateKey } = await generateKey();
@@ -134,11 +134,11 @@ export default function Layout() {
         i--;
       }
     });
-    watchNetwork((network) => {
+    watchNetwork(async (network) => {
       const chainId = isVercel ? mainnet.id : goerli.id;
       if (network.chain?.id === chainId) {
         i++;
-        !isFirst && init();
+        !isFirst && (await init());
       }
     });
   }, []);
