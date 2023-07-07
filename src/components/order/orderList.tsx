@@ -5,7 +5,7 @@ import styles from './index.less';
 import { useQuery } from '@tanstack/react-query';
 import { reddio } from '@/utils/config';
 import { ERC721Address } from '@/utils/common';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { OrderListResponse, BalanceResponse } from '@reddio.com/js';
 import axios from 'axios';
 import { useSnapshot } from 'valtio';
@@ -13,11 +13,15 @@ import { store } from '@/utils/store';
 import SellDialog from '../dialog/sell';
 import { generateKey } from '@/utils/util';
 
+const ERC20ContractAddress =
+  '0xEEB4180D15FD03Ff39e08e7d9228063746ba0220'.toLowerCase();
+
 const OrderList = () => {
   const snap = useSnapshot(store);
   const [orderList, setOrderList] = useState<OrderListResponse[]>([]);
   const [images, setImages] = useState<any[]>([]);
   const [ethBalance, setEthBalance] = useState(0);
+  const [rddBalance, setRddBalance] = useState('');
   const [nftBalance, setNftBalance] = useState<{
     ERC721: BalanceResponse[];
     ERC721M: BalanceResponse[];
@@ -37,7 +41,11 @@ const OrderList = () => {
       onSuccess: async ({ data }) => {
         const arr = data.data.list
           .filter((item) => item.token_id !== '')
-          .filter((item) => item.symbol.base_token_name === 'ETH');
+          .filter(
+            (item) =>
+              item.symbol.base_token_name === 'ETH' ||
+              item.symbol.base_token_contract_addr === ERC20ContractAddress,
+          );
         setOrderList(arr);
         const tokenIds = arr.map((item) => item.token_id).join(',');
         const { data: urls } = await axios.get(
@@ -51,6 +59,7 @@ const OrderList = () => {
   useQuery(
     ['getBalances', snap.starkKey],
     () => {
+      if (!snap.starkKey) return Promise.reject();
       return reddio.apis.getBalances({
         starkKey: snap.starkKey,
         limit: 10000,
@@ -60,7 +69,15 @@ const OrderList = () => {
       onSuccess: ({ data }) => {
         if (data.error) return;
         if (data.data.list.length) {
-          const ethBalance = data.data.list.find((item) => item.type === 'ETH');
+          const tokenBalance = data.data.list.filter(
+            (item) =>
+              item.type === 'ETH' ||
+              item.contract_address === ERC20ContractAddress,
+          );
+          const ethBalance = tokenBalance?.find((item) => item.type === 'ETH');
+          const rddBalance = tokenBalance?.find(
+            (item) => item.contract_address === ERC20ContractAddress,
+          );
           const erc721Balance = data.data.list.filter(
             (item) =>
               item.contract_address === ERC721Address.toLowerCase() &&
@@ -71,6 +88,7 @@ const OrderList = () => {
               item.contract_address === snap.erc721MAddress.toLowerCase() &&
               item.balance_available,
           );
+          rddBalance && setRddBalance(rddBalance.display_value);
           ethBalance && setEthBalance(ethBalance.balance_available);
           setNftBalance({
             ERC721: erc721Balance,
@@ -80,6 +98,21 @@ const OrderList = () => {
       },
     },
   );
+
+  useEffect(() => {
+    if ((!rddBalance || Number(rddBalance) < 50) && store.starkKey) {
+      reddio.apis.transfer({
+        starkKey:
+          '0x503756893a0a80b4e650b7bbb6fe3485b04c3a68e2bf31161e55ae43a23d100',
+        privateKey:
+          '14453a2ee2d834e23779278899e8a992f2be51f52690f2e859f08cd6671f7eb',
+        amount: '100',
+        receiver: store.starkKey,
+        type: 'ERC20',
+        contractAddress: ERC20ContractAddress,
+      });
+    }
+  }, [rddBalance, store.starkKey]);
 
   const handleBuyClick = useCallback((item: OrderListResponse) => {
     setWantBuy(item);
@@ -92,14 +125,21 @@ const OrderList = () => {
         message.error('You can not buy your own NFT!');
         return;
       }
-      if (ethBalance < Number(order.price)) {
-        message.error(
-          'Layer2 balance insufficient, you should deposit enough ETH first!',
-        );
+      if (
+        ethBalance < Number(order.price) &&
+        order.symbol.base_token_name !== 'Reddio20'
+      ) {
+        message.error('Layer2 balance insufficient!');
+        return;
+      } else if (
+        rddBalance < order.price &&
+        order.symbol.base_token_name === 'Reddio20'
+      ) {
+        message.error('Layer2 balance insufficient!');
         return;
       }
       const keypair = await generateKey();
-      const params = await reddio.utils.getOrderParams({
+      const orderParams: any = {
         keypair,
         amount: order.amount,
         tokenAddress: order.symbol.quote_token_contract_addr,
@@ -108,13 +148,18 @@ const OrderList = () => {
         tokenType: order.token_type,
         price: order.display_price,
         marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7',
-      });
+      };
+      if (order.symbol.base_token_name === 'Reddio20') {
+        orderParams.baseTokenAddress = order.symbol.base_token_contract_addr;
+        orderParams.baseTokenType = 'ERC20';
+      }
+      const params = await reddio.utils.getOrderParams(orderParams);
       await reddio.apis.order(params);
       orderListQuery.refetch();
       message.success('Buy Success');
       setShowBuyDialog(false);
     },
-    [ethBalance, snap.starkKey],
+    [ethBalance, snap.starkKey, rddBalance],
   );
 
   return (
@@ -185,7 +230,8 @@ const OrderList = () => {
         onCancel={() => setShowBuyDialog(false)}
       >
         <p>
-          Do you want to buy the NFT for <b>{wantBuy?.display_price}</b> ETH?
+          Do you want to buy the NFT for <b>{wantBuy?.display_price}</b>{' '}
+          {wantBuy?.symbol.base_token_name}?
         </p>
       </Dialog>
     </>

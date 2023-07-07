@@ -65,6 +65,8 @@ const Sell = (props: IOperateProps) => {
       tokenType: type,
       price: form.getFieldValue?.('price').toString(),
       marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7',
+      baseTokenAddress: '0xEEB4180D15FD03Ff39e08e7d9228063746ba0220',
+      baseTokenType: 'ERC20',
     });
     await reddio.apis.order(params);
     setLoading(false);
@@ -122,7 +124,7 @@ const Sell = (props: IOperateProps) => {
           <FormItem label="Token Id" name="tokenId">
             <Select clearable options={options} />
           </FormItem>
-          <FormItem label="ETH Price" name="price" initialData={0.001}>
+          <FormItem label="Reddio20 Price" name="price" initialData={1}>
             <Input type="number" />
           </FormItem>
           <div className={styles.buttonWrapper}>
