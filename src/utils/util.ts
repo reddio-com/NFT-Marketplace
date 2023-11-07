@@ -33,23 +33,7 @@ const particle = new ParticleNetwork({
 });
 
 const generateKey = async () => {
-  const isLogin = particle.auth.isLogin();
-  if (!isLogin) return reddio.keypair.generateFromEthSignature();
-  const payload = {
-    domain: {
-      chainId: 5,
-    },
-    message: {
-      contents: 'Generate layer 2 key',
-    },
-    primaryType: 'Reddio',
-    types: {
-      EIP712Domain: [{ name: 'chainId', type: 'uint256' }],
-      Reddio: [{ name: 'contents', type: 'string' }],
-    },
-  };
-  const result = await particle.evm.signTypedDataUniq(payload);
-  return reddio.keypair.generateFromSignTypedData(result);
+  return reddio.keypair.generateFromEthSignature();
 };
 
 export {

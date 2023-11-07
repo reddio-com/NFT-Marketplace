@@ -16,7 +16,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
-import { goerli, mainnet } from 'wagmi/chains';
+import { sepolia, mainnet } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { watchAccount, watchNetwork, getNetwork } from '@wagmi/core';
 import { isVercel } from '@/utils/config';
@@ -27,30 +27,24 @@ import {
   rainbowWallet,
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets';
-import { particleWallet } from '@particle-network/rainbowkit-ext';
 import { generateKey, particle } from '@/utils/util';
+import { jsonRpcProvider } from '@wagmi/core/providers/jsonRpc';
 
 const { chains, provider } = configureChains(
-  [isVercel ? mainnet : goerli],
+  [sepolia],
   [
     alchemyProvider({
-      apiKey: isVercel
-        ? 'rLJsa2qBOoeS497vaqqXv9besBxlGK3L'
-        : '3En6dktpG2M1HPNQdoac0PERTR-MFaTW',
+      apiKey: 'GaU_MjT6W_adge_Ms4Gz0L-u6XqRQBGE',
+    }),
+    jsonRpcProvider({
+      rpc: (chain) => ({
+        http: 'https://eth-sepolia.g.alchemy.com/v2/GaU_MjT6W_adge_Ms4Gz0L-u6XqRQBGE',
+      }),
     }),
   ],
 );
 
 const connectors = connectorsForWallets([
-  {
-    groupName: 'Web2 ways',
-    wallets: [
-      particleWallet({ chains, authType: 'google' }),
-      particleWallet({ chains, authType: 'facebook' }),
-      particleWallet({ chains, authType: 'apple' }),
-      particleWallet({ chains }),
-    ],
-  },
   {
     groupName: 'Web3 ways',
     wallets: [
@@ -124,7 +118,7 @@ export default function Layout() {
       addStarkKey(publicKey);
     };
     watchAccount(async (account) => {
-      const chainId = isVercel ? mainnet.id : goerli.id;
+      const chainId = isVercel ? mainnet.id : sepolia.id;
       if (account.address && getNetwork().chain?.id === chainId) {
         i++;
         !isFirst && (await init());
@@ -135,7 +129,7 @@ export default function Layout() {
       }
     });
     watchNetwork(async (network) => {
-      const chainId = isVercel ? mainnet.id : goerli.id;
+      const chainId = isVercel ? mainnet.id : sepolia.id;
       if (network.chain?.id === chainId) {
         i++;
         !isFirst && (await init());
