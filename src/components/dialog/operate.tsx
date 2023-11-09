@@ -32,7 +32,7 @@ const Operate = (props: IOperateProps) => {
   const { type, onClose, l1Balance, l2Balance, ethAddress } = props;
   const [form] = Form.useForm();
 
-  const [selectType, setSelectType] = useState('GoerliETH');
+  const [selectType, setSelectType] = useState('SepoliaETH');
   const [needApprove, setNeedApprove] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -65,7 +65,7 @@ const Operate = (props: IOperateProps) => {
 
   const balance = useMemo(() => {
     if (type === 'Deposit') {
-      return l1Balance[selectType || 'GoerliETH'];
+      return l1Balance[selectType || 'SepoliaETH'];
     }
     const item = l2Balance.find((item) => item.contract_address === selectType);
     return item ? item.display_value : '';
@@ -110,7 +110,7 @@ const Operate = (props: IOperateProps) => {
   const options = useMemo(() => {
     if (type === 'Deposit') {
       return [
-        { label: 'GoerliETH', value: 'GoerliETH' },
+        { label: 'SepoliaETH', value: 'SepoliaETH' },
         { label: 'ERC20', value: 'ERC20' },
         { label: 'ERC721', value: 'ERC721' },
       ];
@@ -206,7 +206,7 @@ const Operate = (props: IOperateProps) => {
         setLoading(true);
         const { starkKey } = store;
         const quantizedAmount = form.getFieldValue?.('amount');
-        if (type === 'GoerliETH') {
+        if (type === 'SepoliaETH') {
           await reddio.apis.depositETH({
             starkKey,
             quantizedAmount,
@@ -254,6 +254,7 @@ const Operate = (props: IOperateProps) => {
           receiver,
           type,
         };
+        console.log(params);
         if (type === 'ERC20') {
           params.contractAddress = selectType;
         }
@@ -386,7 +387,7 @@ const Operate = (props: IOperateProps) => {
           rules={rules}
           onValuesChange={(changedValues) => {
             if (changedValues.type) {
-              setNeedApprove(changedValues.type !== 'GoerliETH');
+              setNeedApprove(changedValues.type !== 'SepoliaETH');
               setSelectType(changedValues.type as any);
               form.reset?.({ type: 'initial', fields: ['amount', 'tokenId'] });
             }

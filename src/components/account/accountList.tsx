@@ -24,12 +24,12 @@ import { ERC20Address, ERC721Address } from '@/utils/common';
 import type { BalancesV2Response } from '@reddio.com/js';
 import { fetchBalance } from '@wagmi/core';
 
-const l1Items = ['GoerliETH', 'ERC20', 'ERC721'];
+const l1Items = ['SepoliaETH', 'ERC20', 'ERC721'];
 
 const AccountList = () => {
   const snap = useSnapshot(store);
   const [l1Balance, setL1Balance] = useState<Record<string, any>>({
-    GoerliETH: '',
+    SepoliaETH: '',
     ERC20: '',
     ERC721: '',
     tokenIds: [],
@@ -94,16 +94,16 @@ const AccountList = () => {
       const address = await getEthAddress();
       if (!address) return;
       setAddress(address);
-      const [eth, erc20, erc721] = await Promise.all([
+      const [eth] = await Promise.all([
         getL1Eth(address),
-        getErc20Balance(),
-        getErc721Balance(ERC721Address),
+        // getErc20Balance(),
+        // getErc721Balance(ERC721Address),
       ]);
       setL1Balance({
-        GoerliETH: eth,
-        ERC20: erc20,
-        ERC721: erc721.length,
-        tokenIds: erc721,
+        SepoliaETH: eth,
+        ERC20: '',
+        ERC721: '',
+        tokenIds: [],
       });
       setLoading((v) => ({
         ...v,

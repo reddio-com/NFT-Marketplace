@@ -13,7 +13,7 @@ interface IWithdrawalProps {
   onClose: () => void;
 }
 
-const items = ['GoerliETH', 'ERC20', 'ERC721'];
+const items = ['SepoliaETH', 'ERC20', 'ERC721'];
 
 const Withdrawal = ({ onClose }: IWithdrawalProps) => {
   const snap = useSnapshot(store);
