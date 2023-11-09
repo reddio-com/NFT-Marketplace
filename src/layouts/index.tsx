@@ -91,6 +91,8 @@ const footerIconLinks = [
   },
 ];
 
+let currentAddress: any = '';
+
 export default function Layout() {
   const [isFirst, setFirst] = useState(
     !Boolean(window.localStorage.getItem('isFirst')),
@@ -127,6 +129,12 @@ export default function Layout() {
         addStarkKey('');
         i--;
       }
+      if (currentAddress && currentAddress !== account.address) {
+        const { publicKey, privateKey } = await generateKey();
+        console.log(publicKey, privateKey);
+        addStarkKey(publicKey);
+      }
+      currentAddress = account.address;
     });
     watchNetwork(async (network) => {
       const chainId = isVercel ? mainnet.id : sepolia.id;
