@@ -31,8 +31,10 @@ const recordStatus = [
   'Submitted',
   'Accepted',
   'Failed',
-  'Proved',
-  'ProvedError',
+  'AcceptedOnL2',
+  'RejectedOnL2',
+  'Rolled',
+  'AcceptedOnL1',
 ];
 
 const color = ['#2C2C2C', '#4CEB1B', '#C9353F'];
