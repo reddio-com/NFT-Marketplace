@@ -1,10 +1,4 @@
-import {
-  Button,
-  Divider,
-  message,
-  Tooltip,
-  Space,
-} from 'tdesign-react';
+import { Button, Divider, message, Tooltip, Space } from 'tdesign-react';
 import {
   ChevronRightIcon,
   GiftIcon,
@@ -30,12 +24,12 @@ import { ERC20Address, ERC721Address } from '@/utils/common';
 import type { BalancesV2Response } from '@reddio.com/js';
 import { fetchBalance } from '@wagmi/core';
 
-const l1Items = ['GoerliETH', 'ERC20', 'ERC721'];
+const l1Items = ['SepoliaETH', 'ERC20', 'ERC721'];
 
 const AccountList = () => {
   const snap = useSnapshot(store);
   const [l1Balance, setL1Balance] = useState<Record<string, any>>({
-    GoerliETH: '',
+    SepoliaETH: '',
     ERC20: '',
     ERC721: '',
     tokenIds: [],
@@ -75,14 +69,7 @@ const AccountList = () => {
     {
       onSuccess: ({ data }) => {
         if (data.status === 'FAILED') return;
-        const res = data.data.filter((item) => {
-          if (item.type === 'ETH' || item.type === 'ERC20') {
-            return true;
-          }
-          // @ts-ignore
-          return item.base_uri !== '';
-        });
-        setL2Balance(res);
+        setL2Balance(data.data);
         setLoading((v) => ({
           ...v,
           l2: false,
@@ -104,19 +91,19 @@ const AccountList = () => {
 
   const getL1Balances = useCallback(async () => {
     try {
-      const address = await getEthAddress()
-      if (!address) return
+      const address = await getEthAddress();
+      if (!address) return;
       setAddress(address);
-      const [eth, erc20, erc721] = await Promise.all([
+      const [eth] = await Promise.all([
         getL1Eth(address),
-        getErc20Balance(),
-        getErc721Balance(ERC721Address),
+        // getErc20Balance(),
+        // getErc721Balance(ERC721Address),
       ]);
       setL1Balance({
-        GoerliETH: eth,
-        ERC20: erc20,
-        ERC721: erc721.length,
-        tokenIds: erc721,
+        SepoliaETH: eth,
+        ERC20: '',
+        ERC721: '',
+        tokenIds: [],
       });
       setLoading((v) => ({
         ...v,
@@ -297,9 +284,9 @@ const AccountList = () => {
                 shape="round"
                 disabled={loading.l2}
                 icon={<LogoutIcon />}
-                onClick={() => handleOperate('Withdrawal')}
+                onClick={() => handleOperate('Withdraw')}
               >
-                Withdrawal
+                Withdraw
               </Button>
             </Tooltip>
           </Space>

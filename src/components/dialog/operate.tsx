@@ -14,6 +14,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { reddio } from '@/utils/config';
 import { ERC20Address, ERC721Address } from '@/utils/common';
 import type { SignTransferParams, BalancesV2Response } from '@reddio.com/js';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { generateKey } from '@/utils/util';
 
 const FormItem = Form.FormItem;
 
@@ -29,9 +32,22 @@ const Operate = (props: IOperateProps) => {
   const { type, onClose, l1Balance, l2Balance, ethAddress } = props;
   const [form] = Form.useForm();
 
-  const [selectType, setSelectType] = useState('GoerliETH');
+  const [selectType, setSelectType] = useState('SepoliaETH');
   const [needApprove, setNeedApprove] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const getBalanceQuery = useQuery(
+    ['getBalancesV3', store.starkKey],
+    () => {
+      return reddio.apis.getBalancesV3({
+        starkKey: store.starkKey,
+        limit: 1000,
+      });
+    },
+    {
+      enabled: type === 'Withdraw',
+    },
+  );
 
   const title = useMemo(() => {
     switch (type) {
@@ -49,7 +65,7 @@ const Operate = (props: IOperateProps) => {
 
   const balance = useMemo(() => {
     if (type === 'Deposit') {
-      return l1Balance[selectType || 'GoerliETH'];
+      return l1Balance[selectType || 'SepoliaETH'];
     }
     const item = l2Balance.find((item) => item.contract_address === selectType);
     return item ? item.display_value : '';
@@ -69,30 +85,6 @@ const Operate = (props: IOperateProps) => {
     [balance],
   );
 
-  const rules = useMemo<any>(() => {
-    return {
-      type: [{ required: true, message: 'Type is required', type: 'error' }],
-      address: [
-        { required: true, message: 'Address is required', type: 'error' },
-      ],
-      tokenId: [
-        {
-          required: form.getFieldValue?.('type') === 'ERC721',
-          message: 'Token ID is required',
-          type: 'error',
-        },
-      ],
-      amount: [
-        {
-          required: form.getFieldValue?.('type') !== 'ERC721',
-          message: 'Amount is required',
-          type: 'error',
-        },
-        { validator: balanceValidator },
-      ],
-    };
-  }, [balanceValidator]);
-
   const buttonText = useMemo(() => {
     if (type === 'Deposit') {
       return needApprove ? 'Approve' : type;
@@ -108,7 +100,8 @@ const Operate = (props: IOperateProps) => {
       }));
     }
     const item = l2Balance.find((item) => item.contract_address === selectType);
-    if (item && (item.type === 'ERC721' || item.type === 'ERC721M')) {
+    if (item && item.type.includes('ERC721')) {
+      // @ts-ignore
       return item.available_token_ids.map((id) => ({ label: id, value: id }));
     }
     return [];
@@ -117,7 +110,7 @@ const Operate = (props: IOperateProps) => {
   const options = useMemo(() => {
     if (type === 'Deposit') {
       return [
-        { label: 'GoerliETH', value: 'GoerliETH' },
+        { label: 'SepoliaETH', value: 'SepoliaETH' },
         { label: 'ERC20', value: 'ERC20' },
         { label: 'ERC721', value: 'ERC721' },
       ];
@@ -134,8 +127,37 @@ const Operate = (props: IOperateProps) => {
       return form.getFieldValue?.('type') === 'ERC721';
     }
     const item = l2Balance.find((item) => item.contract_address === selectType);
-    return item && (item.type === 'ERC721' || item.type === 'ERC721M');
+    return item && item.type.includes('ERC721');
   }, [selectType, l2Balance, type]);
+
+  const isERC721MC = useMemo(() => {
+    const item = l2Balance.find((item) => item.contract_address === selectType);
+    return item && item.type === 'ERC721MC';
+  }, [selectType, l2Balance, type]);
+
+  const rules = useMemo<any>(() => {
+    return {
+      type: [{ required: true, message: 'Type is required', type: 'error' }],
+      address: [
+        { required: true, message: 'Address is required', type: 'error' },
+      ],
+      tokenId: [
+        {
+          required: isERC721,
+          message: 'Token ID is required',
+          type: 'error',
+        },
+      ],
+      amount: [
+        {
+          required: !isERC721,
+          message: 'Amount is required',
+          type: 'error',
+        },
+        { validator: balanceValidator },
+      ],
+    };
+  }, [balanceValidator, form.getFieldValue?.('type'), isERC721, isERC721MC]);
 
   const showNotification = useCallback((content: string) => {
     const notification = NotificationPlugin.success({
@@ -167,7 +189,7 @@ const Operate = (props: IOperateProps) => {
         });
       }
       showNotification(
-        'Approve success，wait a moment before making a deposit',
+        'Approve success, wait a moment before making a deposit',
       );
       await tx.wait();
       setNeedApprove(false);
@@ -184,7 +206,7 @@ const Operate = (props: IOperateProps) => {
         setLoading(true);
         const { starkKey } = store;
         const quantizedAmount = form.getFieldValue?.('amount');
-        if (type === 'GoerliETH') {
+        if (type === 'SepoliaETH') {
           await reddio.apis.depositETH({
             starkKey,
             quantizedAmount,
@@ -218,13 +240,13 @@ const Operate = (props: IOperateProps) => {
   const transfer = useCallback(
     async (type: any) => {
       try {
-        console.log(type, '=======');
         setLoading(true);
         const { starkKey } = store;
         const amount = form.getFieldValue?.('amount');
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
-        const { privateKey } = await reddio.keypair.generateFromEthSignature();
+        const url = form.getFieldValue?.('url');
+        const { privateKey } = await generateKey();
         const params: SignTransferParams = {
           starkKey,
           privateKey,
@@ -232,12 +254,16 @@ const Operate = (props: IOperateProps) => {
           receiver,
           type,
         };
+        console.log(params);
         if (type === 'ERC20') {
           params.contractAddress = selectType;
         }
         if (type === 'ERC721' || type === 'ERC721M') {
           params.contractAddress = selectType;
           params.tokenId = tokenId;
+        }
+        if (type === 'ERC721MC') {
+          params.tokenUrl = url;
         }
         await reddio.apis.transfer(params);
         showNotification('Transfer is successful, please wait for the arrival');
@@ -259,7 +285,20 @@ const Operate = (props: IOperateProps) => {
         const amount = form.getFieldValue?.('amount');
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
-        const { privateKey } = await reddio.keypair.generateFromEthSignature();
+        let url = '';
+        if (getBalanceQuery.data && type === 'ERC721MC') {
+          getBalanceQuery.data?.data.data.forEach((item) => {
+            if (item.contract_address === selectType) {
+              const token = item.available_tokens.find(
+                (token) => token.token_id === tokenId.toString(),
+              );
+              if (token) {
+                url = token.token_uri;
+              }
+            }
+          });
+        }
+        const { privateKey } = await generateKey();
         const params: SignTransferParams = {
           starkKey,
           privateKey,
@@ -270,9 +309,12 @@ const Operate = (props: IOperateProps) => {
         if (type === 'ERC20') {
           params.contractAddress = selectType;
         }
-        if (type === 'ERC721' || type === 'ERC721M') {
+        if (type.includes('ERC721')) {
           params.contractAddress = selectType;
           params.tokenId = tokenId;
+        }
+        if (type === 'ERC721MC') {
+          params.tokenUrl = url;
         }
         await reddio.apis.withdrawalFromL2(params);
         showNotification(
@@ -285,12 +327,11 @@ const Operate = (props: IOperateProps) => {
         setLoading(false);
       }
     },
-    [store, form, selectType],
+    [store, form, selectType, getBalanceQuery.data],
   );
 
   const submit = useCallback(async () => {
-    const error = await form.validate?.();
-    if (error && Object.keys(error).length) return;
+    await form.validate?.();
     const assetType = l2Balance.find(
       (item) => item.contract_address === selectType,
     )?.type;
@@ -307,7 +348,7 @@ const Operate = (props: IOperateProps) => {
         transfer(assetType);
         return;
       }
-      case 'Withdrawal': {
+      case 'Withdraw': {
         withdrawal(assetType);
         return;
       }
@@ -346,7 +387,7 @@ const Operate = (props: IOperateProps) => {
           rules={rules}
           onValuesChange={(changedValues) => {
             if (changedValues.type) {
-              setNeedApprove(changedValues.type !== 'GoerliETH');
+              setNeedApprove(changedValues.type !== 'SepoliaETH');
               setSelectType(changedValues.type as any);
               form.reset?.({ type: 'initial', fields: ['amount', 'tokenId'] });
             }
@@ -361,13 +402,13 @@ const Operate = (props: IOperateProps) => {
           <FormItem
             initialData={
               type !== 'Transfer'
-                ? type === 'Withdrawal'
+                ? type === 'Withdraw'
                   ? ethAddress
                   : store.starkKey
                 : '0x4c2d19ac0a343218cebcea5ab124440a0650744c081247b8e4146877d2a5cad'
             }
             label={
-              type === 'Withdrawal' ? 'To ETH Address' : 'To Starkex Address'
+              type === 'Withdraw' ? 'To ETH Address' : 'To Starkex Address'
             }
             name="address"
           >
@@ -392,11 +433,11 @@ const Operate = (props: IOperateProps) => {
             {buttonText}
           </Button>
         </div>
-        {type === 'Withdrawal' ? (
+        {type === 'Withdraw' ? (
           <div className={styles.infoWrapper}>
             <InfoCircleFilledIcon />
             <Text>
-              Wait approximately 4 ~ 8 hours for funds move to the withdrawal
+              Wait approximately 4 ~ 8 hours for funds move to the Withdraw
               area.
             </Text>
           </div>

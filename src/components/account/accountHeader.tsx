@@ -27,9 +27,9 @@ const AccountHeader = (props: AccountHeaderProps) => {
   }, []);
 
   useEffect(() => {
-    watchAccount(account => {
-      setAddress(account.address as any)
-    })
+    watchAccount((account) => {
+      setAddress(account.address as any);
+    });
   }, []);
 
   return (
@@ -43,33 +43,31 @@ const AccountHeader = (props: AccountHeaderProps) => {
       {showWithdrawal ? (
         <Withdrawal onClose={() => setShowWithdrawal(false)} />
       ) : null}
-      {address ? (
-        <div>
-          <Button
-            theme="primary"
-            variant="text"
-            onClick={() => handlePushClick('/account')}
-          >
-            Account
-          </Button>
-          <Button
-            theme="primary"
-            variant="text"
-            disabled={!snap.starkKey}
-            onClick={() => setShowWithdrawal(true)}
-          >
-            Withdrawal Area
-          </Button>
-          <Button
-            theme="primary"
-            variant="text"
-            disabled={!snap.starkKey}
-            onClick={() => setShowRecord(true)}
-          >
-            Record
-          </Button>
-        </div>
-      ) : null}
+      <div>
+        <Button
+          theme="primary"
+          variant="text"
+          onClick={() => handlePushClick('/account')}
+        >
+          Account
+        </Button>
+        <Button
+          theme="primary"
+          variant="text"
+          disabled={!snap.starkKey}
+          onClick={() => setShowWithdrawal(true)}
+        >
+          Withdraw Area
+        </Button>
+        <Button
+          theme="primary"
+          variant="text"
+          disabled={!snap.starkKey}
+          onClick={() => setShowRecord(true)}
+        >
+          Record
+        </Button>
+      </div>
     </div>
   );
 };

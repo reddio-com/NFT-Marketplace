@@ -36,7 +36,7 @@ const NFTList = () => {
   const getL2BalancesQuery = useQuery(
     ['getBalances', snap.starkKey],
     () => {
-      return reddio.apis.getBalances({
+      return reddio.apis.getBalancesV3({
         starkKey: snap.starkKey,
         contractAddress: address,
       });
@@ -46,25 +46,9 @@ const NFTList = () => {
       onSuccess: async ({ data }) => {
         if (data.status === 'FAILED') return;
         let ids: any[] = [];
-        if (searchParams.get('address') !== null) {
-          ids = data.data.list
-            .filter(
-              (item) =>
-                item.balance_available &&
-                item.contract_address.toLowerCase() === address.toLowerCase(),
-            )
-            .map((item) => item.token_id);
-          // @ts-ignore
-          if (ids.length) setBaseUri(data.data.list[0].base_uri);
-        } else {
-          ids = data.data.list
-            .filter(
-              (item) =>
-                item.balance_available &&
-                item.contract_address === ERC721Address,
-            )
-            .map((item) => item.token_id);
-        }
+        ids = data?.data[0]?.available_tokens.map((item) => item.token_id);
+        // @ts-ignore
+        if (ids.length) setBaseUri(data.data[0].base_uri);
         if (!ids.length) return;
         setTokenIds(ids);
       },

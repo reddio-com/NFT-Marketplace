@@ -9,36 +9,54 @@ import { useCallback, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initReddio, reddio } from '@/utils/config';
 import { addStarkKey } from '@/utils/store';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton, connectorsForWallets } from '@rainbow-me/rainbowkit';
 
 import Alert from '@mui/material/Alert';
 import '@rainbow-me/rainbowkit/styles.css';
 
-import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
-import { goerli, mainnet } from 'wagmi/chains';
+import { sepolia, mainnet } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { watchAccount, watchNetwork, getNetwork } from '@wagmi/core';
 import { isVercel } from '@/utils/config';
+import { ConfigProvider } from 'tdesign-react';
+import enConfig from 'tdesign-react/es/locale/en_US';
+import {
+  metaMaskWallet,
+  rainbowWallet,
+  walletConnectWallet,
+} from '@rainbow-me/rainbowkit/wallets';
+import { generateKey, particle } from '@/utils/util';
+import { jsonRpcProvider } from '@wagmi/core/providers/jsonRpc';
 
 const { chains, provider } = configureChains(
-  [isVercel ? mainnet : goerli],
+  [sepolia],
   [
     alchemyProvider({
-      apiKey: isVercel
-        ? 'rLJsa2qBOoeS497vaqqXv9besBxlGK3L'
-        : '3En6dktpG2M1HPNQdoac0PERTR-MFaTW',
+      apiKey: 'GaU_MjT6W_adge_Ms4Gz0L-u6XqRQBGE',
+    }),
+    jsonRpcProvider({
+      rpc: (chain) => ({
+        http: 'https://eth-sepolia.g.alchemy.com/v2/GaU_MjT6W_adge_Ms4Gz0L-u6XqRQBGE',
+      }),
     }),
   ],
 );
 
-const { connectors } = getDefaultWallets({
-  appName: 'Reddio Demo',
-  chains,
-});
+const connectors = connectorsForWallets([
+  {
+    groupName: 'Web3 ways',
+    wallets: [
+      rainbowWallet({ chains }),
+      walletConnectWallet({ chains }),
+      metaMaskWallet({ chains }),
+    ],
+  },
+]);
 
 const wagmiClient = createClient({
-  autoConnect: true,
+  autoConnect: false,
   connectors,
   provider,
 });
@@ -73,6 +91,8 @@ const footerIconLinks = [
   },
 ];
 
+let currentAddress: any = '';
+
 export default function Layout() {
   const [isFirst, setFirst] = useState(
     !Boolean(window.localStorage.getItem('isFirst')),
@@ -86,19 +106,21 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
+    if (particle.auth.isLogin()) {
+      particle.auth.logout();
+    }
     initReddio(wagmiClient);
     let i = 0;
     const init = async () => {
-      if (i > 1) {
+      if (i > 0) {
         return;
       }
-      const { publicKey, privateKey } =
-        await reddio.keypair.generateFromEthSignature();
+      const { publicKey, privateKey } = await generateKey();
       console.log(publicKey, privateKey);
       addStarkKey(publicKey);
     };
     watchAccount(async (account) => {
-      const chainId = isVercel ? mainnet.id : goerli.id;
+      const chainId = isVercel ? mainnet.id : sepolia.id;
       if (account.address && getNetwork().chain?.id === chainId) {
         i++;
         !isFirst && (await init());
@@ -107,12 +129,18 @@ export default function Layout() {
         addStarkKey('');
         i--;
       }
+      if (currentAddress && currentAddress !== account.address) {
+        const { publicKey, privateKey } = await generateKey();
+        console.log(publicKey, privateKey);
+        addStarkKey(publicKey);
+      }
+      currentAddress = account.address;
     });
-    watchNetwork((network) => {
-      const chainId = isVercel ? mainnet.id : goerli.id;
+    watchNetwork(async (network) => {
+      const chainId = isVercel ? mainnet.id : sepolia.id;
       if (network.chain?.id === chainId) {
         i++;
-        !isFirst && init();
+        !isFirst && (await init());
       }
     });
   }, []);
@@ -121,51 +149,53 @@ export default function Layout() {
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains}>
         <QueryClientProvider client={queryClient}>
-          <div className={styles.layout}>
-            <header>
-              <img src={require('@/assets/logo.png')} alt="" height={24} />
-              <ConnectButton accountStatus="address" />
-            </header>
-            <div className={styles.container}>
-              {isFirst ? (
-                <ConnectDialog onSuccess={handleSuccess} />
-              ) : (
-                <>
-                  <div className={styles.contentWrapper}>
-                    <AccountHeader showAlert={openAlert} />
-                    {openAlert && (
-                      <Alert
-                        severity="info"
-                        onClose={() => setOpenAlert(false)}
-                      >
-                        Your transaction is going to be submitted to Layer2 and
-                        will be proved on L1
-                      </Alert>
-                    )}
-                    <Outlet />
-                  </div>
-                </>
-              )}
+          <ConfigProvider globalConfig={enConfig}>
+            <div className={styles.layout}>
+              <header>
+                <img src={require('@/assets/logo.png')} alt="" height={24} />
+                <ConnectButton accountStatus="address" />
+              </header>
+              <div className={styles.container}>
+                {isFirst ? (
+                  <ConnectDialog onSuccess={handleSuccess} />
+                ) : (
+                  <>
+                    <div className={styles.contentWrapper}>
+                      <AccountHeader showAlert={openAlert} />
+                      {openAlert && (
+                        <Alert
+                          severity="info"
+                          onClose={() => setOpenAlert(false)}
+                        >
+                          Your transaction is going to be submitted to Layer2
+                          and will be proved on L1
+                        </Alert>
+                      )}
+                      <Outlet />
+                    </div>
+                  </>
+                )}
+              </div>
+              <footer className={styles.footer}>
+                <div>
+                  {footerIconLinks.map((icon, index) => {
+                    return (
+                      <img
+                        key={index}
+                        src={icon.img}
+                        className={styles.icon}
+                        onClick={() => window.open(icon.href, '__blank')}
+                      />
+                    );
+                  })}
+                </div>
+                <div className={styles.footerInfo}>
+                  Copyright © {new Date().getFullYear()} Reddio. All rights
+                  reserved.
+                </div>
+              </footer>
             </div>
-            <footer className={styles.footer}>
-              <div>
-                {footerIconLinks.map((icon, index) => {
-                  return (
-                    <img
-                      key={index}
-                      src={icon.img}
-                      className={styles.icon}
-                      onClick={() => window.open(icon.href, '__blank')}
-                    />
-                  );
-                })}
-              </div>
-              <div className={styles.footerInfo}>
-                Copyright © {new Date().getFullYear()} Reddio. All rights
-                reserved.
-              </div>
-            </footer>
-          </div>
+          </ConfigProvider>
         </QueryClientProvider>
       </RainbowKitProvider>
     </WagmiConfig>

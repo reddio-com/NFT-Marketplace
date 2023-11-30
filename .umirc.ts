@@ -1,5 +1,6 @@
 export default {
   npmClient: 'yarn',
+  jsMinifier: 'terser',
   mfsu: false,
   hash: true,
   define: {

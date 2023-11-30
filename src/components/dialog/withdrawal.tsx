@@ -13,13 +13,13 @@ interface IWithdrawalProps {
   onClose: () => void;
 }
 
-const items = ['GoerliETH', 'ERC20', 'ERC721'];
+const items = ['SepoliaETH', 'ERC20', 'ERC721'];
 
 const Withdrawal = ({ onClose }: IWithdrawalProps) => {
   const snap = useSnapshot(store);
 
   const [status, setStatus] = useState<WithdrawalStatusResponse[]>([]);
-  const [isLoading, setIsLoading] = useState({});
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
   const withdrawalStatusQuery = useQuery(
     ['withdrawalStatus', snap.starkKey],
@@ -37,40 +37,30 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
   );
 
   const getText = useCallback((item: WithdrawalStatusResponse) => {
-    if (item.type === 'ERC721' || item.type === 'ERC721M') {
-      return `${item.symbol} - TokenId: ${item.token_id}`;
+    if (item.type.includes('ERC721')) {
+      return `${item.symbol} - ${item.type} - TokenId: ${item.token_id}`;
     }
     return `${item.display_value} ${item.type}`;
   }, []);
 
   const handleWithdrawal = useCallback(
     async (item: WithdrawalStatusResponse) => {
-      const params: any = {
-        ethAddress: await getEthAddress(),
-        type: item.type,
-      };
-      if (item.type === 'ERC721' || item.type === 'ERC721M') {
-        params.assetType = await reddio.utils.getAssetTypeAndId({
+      setIsLoading((value) => ({ ...value, [item.asset_id]: true }));
+      try {
+        await reddio.apis.withdrawalFromL1({
+          ethAddress: await getEthAddress(),
           type: item.type,
-          tokenAddress: item.contract_address,
           tokenId: Number(item.token_id),
+          assetType: item.asset_type,
+          // @ts-ignore
+          tokenUrl: item.token_uri,
         });
-        params.tokenId = Number(item.token_id);
-      } else {
-        params.assetType = await reddio.utils.getAssetTypeAndId({
-          type: item.type,
-          tokenAddress: item.contract_address,
-        });
+        withdrawalStatusQuery.refetch();
+        message.success('Withdrawal success');
+      } catch (e: any) {
+        message.error(e.message);
+        setIsLoading((value) => ({ ...value, [item.asset_id]: false }));
       }
-      setIsLoading((value) => ({ ...value, [item.contract_address]: true }));
-      await reddio.apis.withdrawalFromL1({
-        ethAddress: await getEthAddress(),
-        type: item.type,
-        tokenId: Number(item.token_id),
-        assetType: item.asset_type,
-      });
-      withdrawalStatusQuery.refetch();
-      message.success('Withdrawal success');
     },
     [],
   );
@@ -94,7 +84,7 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
     >
       <div className={styles.withdrawalDialogContent}>
         <div>
-          <Text type="bold">withdrawal area</Text>
+          <Text type="bold">Withdraw area</Text>
         </div>
         <div>
           {status.map((item, index) => {
@@ -104,9 +94,9 @@ const Withdrawal = ({ onClose }: IWithdrawalProps) => {
                 <Button
                   shape="round"
                   onClick={() => handleWithdrawal(item)}
-                  loading={isLoading[item.contract_address]}
+                  loading={isLoading[item.asset_id]}
                 >
-                  Withdrawal
+                  Withdraw
                 </Button>
               </div>
             );
