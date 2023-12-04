@@ -92,6 +92,7 @@ const OrderList = () => {
             type: 'ERC20',
             contractAddress: ERC20Address,
           });
+          setRddBalance((v) => v + 100000000);
         };
 
         if (data.data.length) {
