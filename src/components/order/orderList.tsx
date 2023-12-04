@@ -4,7 +4,7 @@ import Text from '../typography';
 import styles from './index.less';
 import { useQuery } from '@tanstack/react-query';
 import { reddio } from '@/utils/config';
-import { ERC721Address } from '@/utils/common';
+import { ERC20Address, ERC721Address } from '@/utils/common';
 import { useCallback, useEffect, useState } from 'react';
 import type { OrderListResponse, BalanceResponse } from '@reddio.com/js';
 import axios from 'axios';
@@ -13,13 +13,24 @@ import { store } from '@/utils/store';
 import SellDialog from '../dialog/sell';
 import { generateKey } from '@/utils/util';
 
-const ERC20ContractAddress =
-  '0xEEB4180D15FD03Ff39e08e7d9228063746ba0220'.toLowerCase();
+interface IMetadataResponse {
+  data: {
+    attributes: {
+      tokenid: string;
+      url: string;
+    };
+  }[];
+}
+
+const getMetadata = (id: string) => {
+  return axios.get<IMetadataResponse>(
+    `https://track-dev.reddio.com/api/meta-data?filters[tokenid][$eq]=${id}`,
+  );
+};
 
 const OrderList = () => {
   const snap = useSnapshot(store);
   const [orderList, setOrderList] = useState<OrderListResponse[]>([]);
-  const [images, setImages] = useState<any[]>([]);
   const [ethBalance, setEthBalance] = useState(0);
   const [rddBalance, setRddBalance] = useState('');
   const [nftBalance, setNftBalance] = useState<{
@@ -29,6 +40,7 @@ const OrderList = () => {
   const [showSellDialog, setShowSellDialog] = useState(false);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
   const [wantBuy, setWantBuy] = useState<OrderListResponse | null>(null);
+  const [metaData, setMetaData] = useState<any>({});
 
   const orderListQuery = useQuery(
     ['orderList'],
@@ -39,19 +51,20 @@ const OrderList = () => {
     },
     {
       onSuccess: async ({ data }) => {
-        const arr = data.data.list
-          .filter((item) => item.token_id !== '')
-          .filter(
-            (item) =>
-              item.symbol.base_token_name === 'ETH' ||
-              item.symbol.base_token_contract_addr === ERC20ContractAddress,
-          );
-        setOrderList(arr);
-        const tokenIds = arr.map((item) => item.token_id).join(',');
-        const { data: urls } = await axios.get(
-          `https://metadata.reddio.com/metadata?token_ids=${tokenIds}&contract_address=${ERC721Address}`,
-        );
-        setImages(urls.data);
+        const { list } = data.data;
+        setOrderList(list);
+        const ids = list.map((item) => item.token_id);
+        Promise.all(ids.map((id) => getMetadata(id.toString()))).then((res) => {
+          const map = {};
+          res.forEach((item) => {
+            if (item.data.data.length > 0) {
+              // @ts-ignore
+              map[item.data.data[0].attributes.tokenid] =
+                item.data.data[0].attributes.url;
+            }
+          });
+          setMetaData(map);
+        });
       },
     },
   );
@@ -60,59 +73,53 @@ const OrderList = () => {
     ['getBalances', snap.starkKey],
     () => {
       if (!snap.starkKey) return Promise.reject();
-      return reddio.apis.getBalances({
+      return reddio.apis.getBalancesV3({
         starkKey: snap.starkKey,
-        limit: 10000,
       });
     },
     {
       onSuccess: ({ data }) => {
         if (data.error) return;
-        if (data.data.list.length) {
-          const tokenBalance = data.data.list.filter(
+        if (data.data.length) {
+          const tokenBalance = data.data.filter(
             (item) =>
-              item.type === 'ETH' ||
-              item.contract_address === ERC20ContractAddress,
+              item.contract_address === ERC20Address || item.type === 'ETH',
           );
           const ethBalance = tokenBalance?.find((item) => item.type === 'ETH');
           const rddBalance = tokenBalance?.find(
-            (item) => item.contract_address === ERC20ContractAddress,
+            (item) => item.contract_address === ERC20Address,
           );
-          const erc721Balance = data.data.list.filter(
-            (item) =>
-              item.contract_address === ERC721Address.toLowerCase() &&
-              item.balance_available,
+          const erc721MBalance = data.data.filter(
+            (item) => item.contract_address === ERC721Address,
           );
-          const erc721MBalance = data.data.list.filter(
-            (item) =>
-              item.contract_address === snap.erc721MAddress.toLowerCase() &&
-              item.balance_available,
-          );
-          rddBalance && setRddBalance(rddBalance.display_value);
+          rddBalance && setRddBalance(rddBalance.balance_available.toString());
           ethBalance && setEthBalance(ethBalance.balance_available);
           setNftBalance({
-            ERC721: erc721Balance,
-            ERC721M: erc721MBalance,
+            ERC721: [],
+            ERC721M: erc721MBalance
+              .map((item) => item.available_tokens)
+              .flat() as any,
           });
+          if (
+            rddBalance &&
+            rddBalance.balance_available < 5000000 &&
+            store.starkKey
+          ) {
+            reddio.apis.transfer({
+              starkKey:
+                '0x503756893a0a80b4e650b7bbb6fe3485b04c3a68e2bf31161e55ae43a23d100',
+              privateKey:
+                '14453a2ee2d834e23779278899e8a992f2be51f52690f2e859f08cd6671f7eb',
+              amount: '100',
+              receiver: store.starkKey,
+              type: 'ERC20',
+              contractAddress: ERC20Address,
+            });
+          }
         }
       },
     },
   );
-
-  useEffect(() => {
-    if ((!rddBalance || Number(rddBalance) < 50) && store.starkKey) {
-      reddio.apis.transfer({
-        starkKey:
-          '0x503756893a0a80b4e650b7bbb6fe3485b04c3a68e2bf31161e55ae43a23d100',
-        privateKey:
-          '14453a2ee2d834e23779278899e8a992f2be51f52690f2e859f08cd6671f7eb',
-        amount: '100',
-        receiver: store.starkKey,
-        type: 'ERC20',
-        contractAddress: ERC20ContractAddress,
-      });
-    }
-  }, [rddBalance, store.starkKey]);
 
   const handleBuyClick = useCallback((item: OrderListResponse) => {
     setWantBuy(item);
@@ -125,16 +132,7 @@ const OrderList = () => {
         message.error('You can not buy your own NFT!');
         return;
       }
-      if (
-        ethBalance < Number(order.price) &&
-        order.symbol.base_token_name !== 'Reddio20'
-      ) {
-        message.error('Layer2 balance insufficient!');
-        return;
-      } else if (
-        rddBalance < order.price &&
-        order.symbol.base_token_name === 'Reddio20'
-      ) {
+      if (rddBalance < order.price) {
         message.error('Layer2 balance insufficient!');
         return;
       }
@@ -149,10 +147,8 @@ const OrderList = () => {
         price: order.display_price,
         marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7',
       };
-      if (order.symbol.base_token_name === 'Reddio20') {
-        orderParams.baseTokenAddress = order.symbol.base_token_contract_addr;
-        orderParams.baseTokenType = 'ERC20';
-      }
+      orderParams.baseTokenAddress = order.symbol.base_token_contract_addr;
+      orderParams.baseTokenType = 'ERC20';
       const params = await reddio.utils.getOrderParams(orderParams);
       await reddio.apis.order(params);
       orderListQuery.refetch();
@@ -182,9 +178,9 @@ const OrderList = () => {
               <Col flex="190px" className={styles.item} key={index}>
                 <div>
                   <div style={{ width: 190, height: 190 }}>
-                    {images.length ? (
+                    {metaData[item.token_id] ? (
                       <Image
-                        src={images[index]?.image}
+                        src={metaData[item.token_id]}
                         alt=""
                         style={{
                           width: '100%',

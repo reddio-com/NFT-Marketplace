@@ -4,7 +4,7 @@ import styles from './index.less';
 import { useCallback, useMemo, useState } from 'react';
 import type { BalanceResponse } from '@reddio.com/js';
 import { reddio } from '@/utils/config';
-import { ERC721Address } from '@/utils/common';
+import { ERC20Address, ERC721Address } from '@/utils/common';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
@@ -27,7 +27,7 @@ const Sell = (props: IOperateProps) => {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const [selectedType, setSelectedType] = useState<'ERC721' | 'ERC721M'>(
-    'ERC721',
+    'ERC721M',
   );
 
   const rules = useMemo<any>(() => {
@@ -59,13 +59,13 @@ const Sell = (props: IOperateProps) => {
     const params = await reddio.utils.getOrderParams({
       keypair,
       amount: '1',
-      tokenAddress: type === 'ERC721' ? ERC721Address : snap.erc721MAddress,
+      tokenAddress: ERC721Address,
       tokenId: form.getFieldValue?.('tokenId'),
       orderType: 'sell',
       tokenType: type,
       price: form.getFieldValue?.('price').toString(),
       marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7',
-      baseTokenAddress: '0xEEB4180D15FD03Ff39e08e7d9228063746ba0220',
+      baseTokenAddress: ERC20Address,
       baseTokenType: 'ERC20',
     });
     await reddio.apis.order(params);
@@ -112,13 +112,10 @@ const Sell = (props: IOperateProps) => {
             }
           }}
         >
-          <FormItem label="Asset Type" name="type" initialData="ERC721">
+          <FormItem label="Asset Type" name="type" initialData="ERC721M">
             <Select
               clearable
-              options={[
-                { label: 'ERC721', value: 'ERC721' },
-                { label: 'ERC721M', value: 'ERC721M' },
-              ]}
+              options={[{ label: 'ERC721M', value: 'ERC721M' }]}
             />
           </FormItem>
           <FormItem label="Token Id" name="tokenId">

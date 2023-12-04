@@ -31,14 +31,18 @@ import { generateKey, particle } from '@/utils/util';
 import { jsonRpcProvider } from '@wagmi/core/providers/jsonRpc';
 
 const { chains, provider } = configureChains(
-  [sepolia],
+  [isVercel ? mainnet : sepolia],
   [
     alchemyProvider({
-      apiKey: 'GaU_MjT6W_adge_Ms4Gz0L-u6XqRQBGE',
+      apiKey: isVercel
+        ? 'rLJsa2qBOoeS497vaqqXv9besBxlGK3L'
+        : 'GaU_MjT6W_adge_Ms4Gz0L-u6XqRQBGE',
     }),
     jsonRpcProvider({
       rpc: (chain) => ({
-        http: 'https://eth-sepolia.g.alchemy.com/v2/GaU_MjT6W_adge_Ms4Gz0L-u6XqRQBGE',
+        http: isVercel
+          ? 'https://eth-mainnet.g.alchemy.com/v2/rLJsa2qBOoeS497vaqqXv9besBxlGK3L'
+          : 'https://eth-sepolia.g.alchemy.com/v2/GaU_MjT6W_adge_Ms4Gz0L-u6XqRQBGE',
       }),
     }),
   ],
@@ -102,14 +106,14 @@ export default function Layout() {
 
   const handleSuccess = useCallback(() => {
     setFirst(false);
-    initReddio(wagmiClient);
+    initReddio();
   }, []);
 
   useEffect(() => {
     if (particle.auth.isLogin()) {
       particle.auth.logout();
     }
-    initReddio(wagmiClient);
+    initReddio();
     let i = 0;
     const init = async () => {
       if (i > 0) {
