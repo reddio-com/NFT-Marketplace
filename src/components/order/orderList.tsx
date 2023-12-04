@@ -80,6 +80,20 @@ const OrderList = () => {
     {
       onSuccess: ({ data }) => {
         if (data.error) return;
+
+        const transfer = () => {
+          reddio.apis.transfer({
+            starkKey:
+              '0x503756893a0a80b4e650b7bbb6fe3485b04c3a68e2bf31161e55ae43a23d100',
+            privateKey:
+              '14453a2ee2d834e23779278899e8a992f2be51f52690f2e859f08cd6671f7eb',
+            amount: '100',
+            receiver: store.starkKey,
+            type: 'ERC20',
+            contractAddress: ERC20Address,
+          });
+        };
+
         if (data.data.length) {
           const tokenBalance = data.data.filter(
             (item) =>
@@ -106,17 +120,10 @@ const OrderList = () => {
               rddBalance.balance_available < 500000000 &&
               store.starkKey);
           if (needAirdrop) {
-            reddio.apis.transfer({
-              starkKey:
-                '0x503756893a0a80b4e650b7bbb6fe3485b04c3a68e2bf31161e55ae43a23d100',
-              privateKey:
-                '14453a2ee2d834e23779278899e8a992f2be51f52690f2e859f08cd6671f7eb',
-              amount: '100',
-              receiver: store.starkKey,
-              type: 'ERC20',
-              contractAddress: ERC20Address,
-            });
+            transfer();
           }
+        } else {
+          transfer();
         }
       },
     },
