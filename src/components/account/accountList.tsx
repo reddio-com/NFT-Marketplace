@@ -24,7 +24,7 @@ import { ERC20Address, ERC721Address } from '@/utils/common';
 import type { BalancesV2Response } from '@reddio.com/js';
 import { fetchBalance } from '@wagmi/core';
 
-const l1Items = ['SepoliaETH', 'ERC20', 'ERC721'];
+const l1Items = ['SepoliaETH'];
 
 const AccountList = () => {
   const snap = useSnapshot(store);
@@ -199,17 +199,6 @@ const AccountList = () => {
                 </div>
               );
             })}
-          </div>
-          <div className={styles.buttonWrapper}>
-            <Button
-              theme="default"
-              shape="round"
-              loading={loading.testAsset}
-              icon={<GiftIcon />}
-              onClick={handleGetTestAsset}
-            >
-              Get test assets
-            </Button>
           </div>
         </div>
         <div>

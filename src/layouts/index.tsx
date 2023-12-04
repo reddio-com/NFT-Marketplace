@@ -60,7 +60,7 @@ const connectors = connectorsForWallets([
 ]);
 
 const wagmiClient = createClient({
-  autoConnect: false,
+  autoConnect: true,
   connectors,
   provider,
 });
@@ -110,13 +110,10 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
-    if (particle.auth.isLogin()) {
-      particle.auth.logout();
-    }
     initReddio();
     let i = 0;
     const init = async () => {
-      if (i > 0) {
+      if (i > 1) {
         return;
       }
       const { publicKey, privateKey } = await generateKey();
