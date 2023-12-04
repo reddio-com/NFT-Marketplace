@@ -100,11 +100,12 @@ const OrderList = () => {
               .map((item) => item.available_tokens)
               .flat() as any,
           });
-          if (
-            rddBalance &&
-            rddBalance.balance_available < 5000000 &&
-            store.starkKey
-          ) {
+          const needAirdrop =
+            (!rddBalance && store.starkKey) ||
+            (rddBalance &&
+              rddBalance.balance_available < 500000000 &&
+              store.starkKey);
+          if (needAirdrop) {
             reddio.apis.transfer({
               starkKey:
                 '0x503756893a0a80b4e650b7bbb6fe3485b04c3a68e2bf31161e55ae43a23d100',
