@@ -1,4 +1,13 @@
-import { Button, Row, Col, message, Image, Space, Dialog } from 'tdesign-react';
+import {
+  Button,
+  Row,
+  Col,
+  message,
+  Image,
+  Space,
+  Dialog,
+  Radio,
+} from 'tdesign-react';
 import { ShopIcon } from 'tdesign-icons-react';
 import Text from '../typography';
 import styles from './index.less';
@@ -41,6 +50,7 @@ const OrderList = () => {
   const [showBuyDialog, setShowBuyDialog] = useState(false);
   const [wantBuy, setWantBuy] = useState<OrderListResponse | null>(null);
   const [metaData, setMetaData] = useState<any>({});
+  const [menu, setMenu] = useState<any>('NFT');
 
   const orderListQuery = useQuery(
     ['orderList'],
@@ -178,8 +188,19 @@ const OrderList = () => {
             disabled={!snap.starkKey}
             onClick={() => setShowSellDialog(true)}
           >
-            Sell NFT
+            Sell {menu}
           </Button>
+        </div>
+        <div style={{ margin: '20px auto' }}>
+          <Radio.Group
+            variant="default-filled"
+            size="large"
+            value={menu}
+            onChange={(v) => setMenu(v)}
+          >
+            <Radio.Button value="NFT">NFT</Radio.Button>
+            <Radio.Button value="ERC20">ERC20</Radio.Button>
+          </Radio.Group>
         </div>
         <Row gutter={[20, 24]}>
           {orderList.map((item, index) => {
