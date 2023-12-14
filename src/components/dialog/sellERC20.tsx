@@ -4,7 +4,7 @@ import styles from './index.less';
 import { useCallback, useMemo, useState } from 'react';
 import type { BalanceResponse } from '@reddio.com/js';
 import { reddio } from '@/utils/config';
-import { ERC20Address, ERC721Address } from '@/utils/common';
+import { ERC20Address, ERC721Address, USRDAddress } from '@/utils/common';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
@@ -20,58 +20,41 @@ interface IOperateProps {
   };
 }
 
-const Sell = (props: IOperateProps) => {
+const SellERC20 = (props: IOperateProps) => {
   const { onClose, balance } = props;
   const snap = useSnapshot(store);
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
-  const [selectedType, setSelectedType] = useState<'ERC721' | 'ERC721M'>(
-    'ERC721M',
-  );
 
   const rules = useMemo<any>(() => {
     return {
       price: [{ required: true, message: 'Price is required', type: 'error' }],
-      tokenId: [
-        {
-          required: true,
-          message: 'Token ID is required',
-          type: 'error',
-        },
+      amount: [
+        { required: true, message: 'Amount is required', type: 'error' },
       ],
     };
   }, []);
-
-  const options = useMemo(() => {
-    return balance[selectedType].map((item: any) => ({
-      label: item.token_id,
-      value: item.token_id,
-    }));
-  }, [balance, selectedType]);
 
   const submit = useCallback(async () => {
     const error = await form.validate?.();
     if (error && Object.keys(error).length) return;
     setLoading(true);
-    const type = form.getFieldValue?.('type');
     const keypair = await generateKey();
     const params = await reddio.utils.getOrderParams({
       keypair,
       amount: '1',
-      tokenAddress: ERC721Address,
-      tokenId: form.getFieldValue?.('tokenId'),
+      tokenAddress: ERC20Address,
       orderType: 'sell',
-      tokenType: type,
+      tokenType: 'ERC20',
       price: form.getFieldValue?.('price').toString(),
-      marketplaceUuid: '11ed793a-cc11-4e44-9738-97165c4e14a7',
-      baseTokenAddress: ERC20Address,
+      baseTokenAddress: USRDAddress,
       baseTokenType: 'ERC20',
     });
     await reddio.apis.order(params);
     setLoading(false);
-    queryClient.refetchQueries(['orderList']);
-    message.success('Sell Success');
+    queryClient.refetchQueries(['erc20OrderListQuery']);
+    message.success('SellERC20 Success');
     onClose();
   }, []);
 
@@ -94,7 +77,7 @@ const Sell = (props: IOperateProps) => {
     >
       <div className={styles.operateDialogContent}>
         <div>
-          <Text type="bold">Sell NFT</Text>
+          <Text type="bold">Sell ERC20</Text>
         </div>
         <Form
           form={form}
@@ -105,23 +88,11 @@ const Sell = (props: IOperateProps) => {
           preventSubmitDefault
           showErrorMessage
           rules={rules}
-          onValuesChange={(changedValues) => {
-            if (changedValues.type) {
-              form.reset?.({ fields: ['tokenId'] });
-              setSelectedType(changedValues.type as any);
-            }
-          }}
         >
-          <FormItem label="Asset Type" name="type" initialData="ERC721M">
-            <Select
-              clearable
-              options={[{ label: 'ERC721M', value: 'ERC721M' }]}
-            />
+          <FormItem label="Amount" name="amount" initialData={1}>
+            <Input type="number" />
           </FormItem>
-          <FormItem label="Token Id" name="tokenId">
-            <Select clearable options={options} />
-          </FormItem>
-          <FormItem label="Reddio20 Price" name="price" initialData={1}>
+          <FormItem label="RED20 Price" name="price" initialData={1}>
             <Input type="number" />
           </FormItem>
           <div className={styles.buttonWrapper}>
@@ -148,4 +119,4 @@ const Sell = (props: IOperateProps) => {
   );
 };
 
-export default Sell;
+export default SellERC20;

@@ -13,14 +13,15 @@ import Text from '../typography';
 import styles from './index.less';
 import { useQuery } from '@tanstack/react-query';
 import { reddio } from '@/utils/config';
-import { ERC20Address, ERC721Address } from '@/utils/common';
+import { ERC20Address, ERC721Address, USRDAddress } from '@/utils/common';
 import { useCallback, useEffect, useState } from 'react';
 import type { OrderListResponse, BalanceResponse } from '@reddio.com/js';
 import axios from 'axios';
 import { useSnapshot } from 'valtio';
 import { store } from '@/utils/store';
-import SellDialog from '../dialog/sell';
+import SellDialog from '../dialog/sellNFT';
 import { generateKey } from '@/utils/util';
+import SellERC20 from '@/components/dialog/sellERC20';
 
 interface IMetadataResponse {
   data: {
@@ -47,6 +48,7 @@ const OrderList = () => {
     ERC721M: BalanceResponse[];
   }>({ ERC721: [], ERC721M: [] });
   const [showSellDialog, setShowSellDialog] = useState(false);
+  const [showSellERC20Dialog, setShowERC20Dialog] = useState(false);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
   const [wantBuy, setWantBuy] = useState<OrderListResponse | null>(null);
   const [metaData, setMetaData] = useState<any>({});
@@ -78,6 +80,15 @@ const OrderList = () => {
       },
     },
   );
+
+  const { data } = useQuery(['erc20OrderListQuery'], () =>
+    reddio.apis.getDepth({
+      baseContract: USRDAddress,
+      quoteContract: ERC20Address,
+    }),
+  );
+
+  console.log(data?.data);
 
   useQuery(
     ['getBalances', snap.starkKey],
@@ -186,7 +197,11 @@ const OrderList = () => {
             theme="primary"
             variant="text"
             disabled={!snap.starkKey}
-            onClick={() => setShowSellDialog(true)}
+            onClick={() =>
+              menu === 'NFT'
+                ? setShowSellDialog(true)
+                : setShowERC20Dialog(true)
+            }
           >
             Sell {menu}
           </Button>
@@ -243,6 +258,12 @@ const OrderList = () => {
         <SellDialog
           balance={nftBalance}
           onClose={() => setShowSellDialog(false)}
+        />
+      ) : null}
+      {showSellERC20Dialog ? (
+        <SellERC20
+          balance={nftBalance}
+          onClose={() => setShowERC20Dialog(false)}
         />
       ) : null}
       <Dialog
