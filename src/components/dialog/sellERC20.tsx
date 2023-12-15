@@ -43,12 +43,12 @@ const SellERC20 = (props: IOperateProps) => {
     const keypair = await generateKey();
     const params = await reddio.utils.getOrderParams({
       keypair,
-      amount: '1',
-      tokenAddress: ERC20Address,
+      amount: form.getFieldValue?.('amount').toString(),
+      tokenAddress: USRDAddress,
       orderType: 'sell',
       tokenType: 'ERC20',
       price: form.getFieldValue?.('price').toString(),
-      baseTokenAddress: USRDAddress,
+      baseTokenAddress: ERC20Address,
       baseTokenType: 'ERC20',
     });
     await reddio.apis.order(params);

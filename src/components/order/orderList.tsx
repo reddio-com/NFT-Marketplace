@@ -51,6 +51,9 @@ const OrderList = () => {
   const [showSellERC20Dialog, setShowERC20Dialog] = useState(false);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
   const [wantBuy, setWantBuy] = useState<OrderListResponse | null>(null);
+  const [wantBuyERC20, setWantBuyERC20] = useState<[string, string] | null>(
+    null,
+  );
   const [metaData, setMetaData] = useState<any>({});
   const [menu, setMenu] = useState<any>('NFT');
 
@@ -81,14 +84,12 @@ const OrderList = () => {
     },
   );
 
-  const { data } = useQuery(['erc20OrderListQuery'], () =>
+  const { data, refetch } = useQuery(['erc20OrderListQuery'], () =>
     reddio.apis.getDepth({
-      baseContract: USRDAddress,
-      quoteContract: ERC20Address,
+      baseContract: ERC20Address,
+      quoteContract: USRDAddress,
     }),
   );
-
-  console.log(data?.data);
 
   useQuery(
     ['getBalances', snap.starkKey],
@@ -151,21 +152,17 @@ const OrderList = () => {
     },
   );
 
-  const handleBuyClick = useCallback((item: OrderListResponse) => {
-    setWantBuy(item);
-    setShowBuyDialog(true);
-  }, []);
+  const handleBuyClick = useCallback(
+    (item: OrderListResponse | null, depth: [string, string] | null) => {
+      setWantBuy(item);
+      setWantBuyERC20(depth);
+      setShowBuyDialog(true);
+    },
+    [],
+  );
 
   const buy = useCallback(
     async (order: OrderListResponse) => {
-      if (order.stark_key === snap.starkKey) {
-        message.error('You can not buy your own NFT!');
-        return;
-      }
-      if (rddBalance < order.price) {
-        message.error('Layer2 balance insufficient!');
-        return;
-      }
       const keypair = await generateKey();
       const orderParams: any = {
         keypair,
@@ -184,6 +181,34 @@ const OrderList = () => {
       orderListQuery.refetch();
       message.success('Buy Success');
       setShowBuyDialog(false);
+      setWantBuy(null);
+    },
+    [ethBalance, snap.starkKey, rddBalance],
+  );
+
+  const buyUSRD = useCallback(
+    async (order: [string, string]) => {
+      // if (Number(rddBalance) < Number(order[0]) * Number(order[1])) {
+      //   message.error('Layer2 balance insufficient!');
+      //   return;
+      // }
+      const keypair = await generateKey();
+      const orderParams: any = {
+        keypair,
+        amount: order[1],
+        tokenAddress: USRDAddress,
+        orderType: 'buy',
+        tokenType: 'ERC20',
+        price: order[0],
+        baseTokenAddress: ERC20Address,
+        baseTokenType: 'ERC20',
+      };
+      const params = await reddio.utils.getOrderParams(orderParams);
+      await reddio.apis.order(params);
+      refetch();
+      message.success('Buy Success');
+      setShowBuyDialog(false);
+      setWantBuyERC20(null);
     },
     [ethBalance, snap.starkKey, rddBalance],
   );
@@ -218,40 +243,68 @@ const OrderList = () => {
           </Radio.Group>
         </div>
         <Row gutter={[20, 24]}>
-          {orderList.map((item, index) => {
-            return (
-              <Col flex="190px" className={styles.item} key={index}>
-                <div>
-                  <div style={{ width: 190, height: 190 }}>
-                    {metaData[item.token_id] ? (
-                      <Image
-                        src={metaData[item.token_id]}
-                        alt=""
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          background: 'none',
-                        }}
-                      />
-                    ) : null}
-                  </div>
-                  <Button
-                    icon={<ShopIcon />}
-                    shape="round"
-                    disabled={!snap.starkKey}
-                    onClick={() => handleBuyClick(item)}
+          {menu === 'NFT'
+            ? orderList.map((item, index) => {
+                return (
+                  <Col flex="190px" className={styles.item} key={index}>
+                    <div>
+                      <div style={{ width: 190, height: 190 }}>
+                        {metaData[item.token_id] ? (
+                          <Image
+                            src={metaData[item.token_id]}
+                            alt=""
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              background: 'none',
+                            }}
+                          />
+                        ) : null}
+                      </div>
+                      <Button
+                        icon={<ShopIcon />}
+                        shape="round"
+                        disabled={!snap.starkKey}
+                        onClick={() => handleBuyClick(item, null)}
+                      >
+                        Buy
+                      </Button>
+                    </div>
+                    <Text>
+                      {item.display_price} {item.symbol.base_token_name}
+                    </Text>
+                    <Space />
+                    <Text>Token Id: {item.token_id}</Text>
+                  </Col>
+                );
+              })
+            : data?.data.data.asks?.map((item, index) => {
+                return (
+                  <Col
+                    flex="190px"
+                    className={styles.item}
+                    key={index}
+                    style={{ gap: 4 }}
                   >
-                    Buy
-                  </Button>
-                </div>
-                <Text>
-                  {item.display_price} {item.symbol.base_token_name}
-                </Text>
-                <Space />
-                <Text>Token Id: {item.token_id}</Text>
-              </Col>
-            );
-          })}
+                    <Text>{item[1]} USRD</Text>
+                    <Space />
+                    <Text>Price: {item[0]} RED20</Text>
+                    <Space />
+                    <Text>
+                      Total: {Number(item[0]) * Number(item[1])} RED20
+                    </Text>
+                    <Space />
+                    <Button
+                      icon={<ShopIcon />}
+                      shape="round"
+                      disabled={!snap.starkKey}
+                      onClick={() => handleBuyClick(null, item)}
+                    >
+                      Buy
+                    </Button>
+                  </Col>
+                );
+              })}
         </Row>
       </div>
       {showSellDialog ? (
@@ -267,18 +320,23 @@ const OrderList = () => {
         />
       ) : null}
       <Dialog
-        header="Buy NFT"
+        header="Buy ERC20"
         visible={showBuyDialog}
         confirmOnEnter
         cancelBtn="Cancel"
         confirmBtn="Confirm"
         onClose={() => setShowBuyDialog(false)}
-        onConfirm={() => buy(wantBuy!)}
+        onConfirm={() => (wantBuy ? buy(wantBuy!) : buyUSRD(wantBuyERC20!))}
         onCancel={() => setShowBuyDialog(false)}
       >
         <p>
-          Do you want to buy the NFT for <b>{wantBuy?.display_price}</b>{' '}
-          {wantBuy?.symbol.base_token_name}?
+          {wantBuy
+            ? `Do you want to buy the NFT for ${wantBuy?.display_price}
+          ${wantBuy?.symbol.base_token_name}?`
+            : `Do you want to buy the USRD for ${
+                Number(wantBuyERC20?.[0]) * Number(wantBuyERC20?.[1])
+              }
+          RED20?`}
         </p>
       </Dialog>
     </>

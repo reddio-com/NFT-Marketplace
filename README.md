@@ -11,7 +11,7 @@ This new zkRollup technology  is being widely use by many NFT marketplaces, Game
 ## Functionalities
 
 - Buy a pre-minted token on layer 2.
-- Sell the token that was bought on layer 2.
+- SellNFT the token that was bought on layer 2.
 - Deposit NFTs/ETH/ERC20 tokens to Wallet on layer 2
 - Transfer NFTs/ETH/ERC20 tokens between layer 1 and layer 2
 - Withdraw NFTs/ETH/ERC20 tokens from layer 2
