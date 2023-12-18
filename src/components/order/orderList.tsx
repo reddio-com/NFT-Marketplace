@@ -286,7 +286,7 @@ const OrderList = () => {
                     key={index}
                     style={{ gap: 4 }}
                   >
-                    <Text>{item[1]} USRD</Text>
+                    <Text>{item[1]} USDR</Text>
                     <Space />
                     <Text>Price: {item[0]} RED20</Text>
                     <Space />
@@ -333,7 +333,7 @@ const OrderList = () => {
           {wantBuy
             ? `Do you want to buy the NFT for ${wantBuy?.display_price}
           ${wantBuy?.symbol.base_token_name}?`
-            : `Do you want to buy the USRD for ${
+            : `Do you want to buy the ${wantBuyERC20?.[1]} USDR for ${
                 Number(wantBuyERC20?.[0]) * Number(wantBuyERC20?.[1])
               }
           RED20?`}
