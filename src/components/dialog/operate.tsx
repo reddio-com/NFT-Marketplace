@@ -204,7 +204,7 @@ const Operate = (props: IOperateProps) => {
     async (type: any) => {
       try {
         setLoading(true);
-        const starkKey = form.getFieldValue?.('address');
+        const { starkKey } = store;
         const quantizedAmount = form.getFieldValue?.('amount');
         if (type === 'SepoliaETH') {
           await reddio.apis.depositETH({
@@ -241,7 +241,7 @@ const Operate = (props: IOperateProps) => {
     async (type: any) => {
       try {
         setLoading(true);
-        const starkKey = form.getFieldValue?.('address');
+        const { starkKey } = store;
         const amount = form.getFieldValue?.('amount');
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
@@ -281,7 +281,7 @@ const Operate = (props: IOperateProps) => {
     async (type: any) => {
       try {
         setLoading(true);
-        const starkKey = form.getFieldValue?.('address');
+        const { starkKey } = store;
         const amount = form.getFieldValue?.('amount');
         const receiver = form.getFieldValue?.('address');
         const tokenId = form.getFieldValue?.('tokenId');
