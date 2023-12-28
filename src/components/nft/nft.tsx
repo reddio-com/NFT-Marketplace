@@ -11,6 +11,12 @@ interface INFTPros {
   baseUri?: string;
 }
 
+const getMetadata = (id: string) => {
+  return axios.get<any>(
+    `https://track-dev.reddio.com/api/meta-data?filters[tokenid][$eq]=${id}`,
+  );
+};
+
 const NFT = ({ tokenId, type, baseUri }: INFTPros) => {
   const [imageUrl, setImageUrl] = useState('');
   useEffect(() => {
@@ -24,10 +30,19 @@ const NFT = ({ tokenId, type, baseUri }: INFTPros) => {
       const getCustomData = async () => {
         const base = baseUri.endsWith('/') ? baseUri : baseUri + '/';
         if (baseUri.includes('reddiousermetadata')) {
-          const { data } = await axios.get(
-            `${baseUri}${tokenId}/metadata.json`,
-          );
-          setImageUrl(data.image || data.media);
+          try {
+            const { data } = await axios.get(
+              `${baseUri}${tokenId}/metadata.json`,
+            );
+            setImageUrl(data.image || data.media);
+          } catch (e) {
+            getMetadata(tokenId!).then((res: any) => {
+              const length = res.data.data.length;
+              if (length > 0) {
+                setImageUrl(res.data.data[length - 1].attributes.url);
+              }
+            });
+          }
           return;
         }
         const { data } = await axios.get(
