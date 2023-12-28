@@ -72,10 +72,11 @@ const OrderList = () => {
         Promise.all(ids.map((id) => getMetadata(id.toString()))).then((res) => {
           const map = {};
           res.forEach((item) => {
-            if (item.data.data.length > 0) {
+            const length = item.data.data.length;
+            if (length > 0) {
               // @ts-ignore
-              map[item.data.data[0].attributes.tokenid] =
-                item.data.data[0].attributes.url;
+              map[item.data.data[length - 1].attributes.tokenid] =
+                item.data.data[length - 1].attributes.url;
             }
           });
           setMetaData(map);
